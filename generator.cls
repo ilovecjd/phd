@@ -11,8 +11,8 @@ Dim DataIndex   As Integer  ' 데이터가 시작되는 행 번호
 Dim LastIndex   As Integer  ' 데이터가 끝나는 행 번호
 Dim SimulTerm   As Integer  ' 시뮬레이션을 동작 시킬 기간(월)
 Dim PrjDataSize As Integer  ' 프로젝트 구성 요소들의 갯수
-  
-  
+
+
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' 입력 받을 데이터들
 Dim ExtPrjType      As Integer
