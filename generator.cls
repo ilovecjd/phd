@@ -93,22 +93,24 @@ Sub MakePrj(sCnt As Integer)
     Dim s As Integer,  i As Integer,  j As Integer,  k As Integer
 
     ' 환경 변수들
-    Dim posX        As Integer  ' 출력 시작 x
-    Dim posY        As Integer  ' 출력 시작 y 
-    Dim headY       As Integer  ' 헤더의 줄 수
+    Dim posX            As Integer  ' 출력 시작 x
+    Dim posY            As Integer  ' 출력 시작 y 
+    Dim headY           As Integer  ' 헤더의 줄 수
 
-    Dim sum         As Integer  ' 매월 수주한 프로젝트의 합
-    Dim sheetPrj    As Worksheet
+    Dim sum             As Integer  ' 매월 수주한 프로젝트의 합
+    Dim sheetPrj        As Worksheet
 
     Dim strHead(1 to 3) As String   ' 발생 확율 타이틀
     Dim p(1 to 3)       As Variant  ' 발생 확율
+    Dim rangeEnd        As Integer
 
     strHead(1)  = "Opt" : strHead(2)    = "ML"  : strHead(3)    = "Pess"
     p(1)        = 0.6   : p(2)          = 0.25  : p(3)          = 0.175 
     
-    posX        = 2
+    posX        = 2 ' 언제나 2보다 커야한다. (개월수를 표시할 공간을 위해서)
     posY        = 2
     headY       = 3             ' 헤더는 3줄이 들어간다.
+    rangeEnd    = posY + headY + SimulTerm - 1 ' 배열 복사할 Range의 끝 위치
  
     ' 사용된 모든 범위에서 마지막셀을 찾아서 병합을 풀고 내용을 지운다.    
     'With ThisWorkBook.WorkSheets("project")
@@ -129,6 +131,14 @@ Sub MakePrj(sCnt As Integer)
             .Range(.Cells(posY + 1, (i-1) * 3 + posX),.Cells(posY + 1,i * 3 +posX-1)).Value = strHead
             .Range(.Cells(posY + 2, (i-1) * 3 + posX),.Cells(posY + 2,i * 3 +posX-1)).Value = p
         Next
+
+        Dim term() As Integer
+        Redim term(1 to SimulTerm, 1 to 1)
+
+        For i = 1 to SimulTerm
+            term(i,1) = i
+        Next
+        .Range(.Cells(posY+headY , posX-1),.Cells(rangeEnd, posX-1 )).Value = term
 
     End With 
 
@@ -158,7 +168,7 @@ Sub MakePrj(sCnt As Integer)
 
         ' 생성된 시나리오를 복사해서 옮긴다.
         With sheetPrj
-            .Range(.Cells(posY+headY , (s-1) * 3 + posX),.Cells(headY + SimulTerm, s * 3 + posX - 1)).Value = tempArr
+            .Range(.Cells(posY+headY , (s-1) * 3 + posX),.Cells(rangeEnd, s * 3 + posX - 1)).Value = tempArr
         End With
 
     Next s
