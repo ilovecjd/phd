@@ -3,15 +3,26 @@ Option Explicit
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' 프로그램 동작을 위한 기본 정보들
-Dim Opt         As Double   ' 낙관적인 전망
-Dim ML          As Double   ' 일반적인 전망
-Dim Pess        As Double   ' 비관적인 전망
 Dim DataColumn  As Integer  ' 데이터가 들어있는 열 번호
+
 Dim DataIndex   As Integer  ' 데이터가 시작되는 행 번호
 Dim LastIndex   As Integer  ' 데이터가 끝나는 행 번호
 Dim SimulTerm   As Integer  ' 시뮬레이션을 동작 시킬 기간(월)
 Dim PrjDataSize As Integer  ' 프로젝트 구성 요소들의 갯수
 
+Dim Hr_Init_H   As Integer  ' 최초에 보유한 고급 인력
+Dim Hr_Init_M   As Integer  ' 최초에 보유한 중급 인력
+Dim Hr_Init_L   As Integer  ' 최초에 보유한 초급 인력
+Dim Hr_LeadTime As Integer  ' 인력 충원에 걸리는 시간
+
+Dim Cash_Init   As Integer  ' 최초 보유 현금
+
+Dim PrjMaxCnt   As Integer  ' 월간 최대 발생 프로젝트(년평균)
+Dim Opt         As Double   ' 낙관적인 전망치 / 각각 독립적으로 3가지 상황을 가정
+Dim ML          As Double   ' 일반적인 전망치 / 각각 독립적으로 3가지 상황을 가정
+Dim Pess        As Double   ' 비관적인 전망치 / 각각 독립적으로 3가지 상황을 가정
+
+Dim Problem     As Integer  ' 프로젝트 생성 개수 (= 문제의 개수) / MakePrj 함수의 인자
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' 입력 받을 데이터들
@@ -38,6 +49,18 @@ Sub Prologue()
     SimulTerm   = GetDataAndSetNext(i, DataColumn)
     PrjDataSize = GetDataAndSetNext(i, DataColumn)
 
+    Hr_Init_H   = GetDataAndSetNext(i, DataColumn)
+    Hr_Init_M   = GetDataAndSetNext(i, DataColumn)
+    Hr_Init_L   = GetDataAndSetNext(i, DataColumn)
+    Hr_LeadTime = GetDataAndSetNext(i, DataColumn)
+    Cash_Init   = GetDataAndSetNext(i, DataColumn)
+
+    PrjMaxCnt   = GetDataAndSetNext(i, DataColumn)
+    Opt         = GetDataAndSetNext(i, DataColumn)
+    ML          = GetDataAndSetNext(i, DataColumn)
+    Pess        = GetDataAndSetNext(i, DataColumn)
+
+    Problem     = GetDataAndSetNext(i, DataColumn) ' MakePrj 함수의 인자
 End Sub
 
 
@@ -65,9 +88,6 @@ Sub BuildPrj()
     Dim i As Integer
     i               = DataIndex
 
-    Opt             = GetDataAndSetNext(i, DataColumn)
-    ML              = GetDataAndSetNext(i, DataColumn)
-    Pess            = GetDataAndSetNext(i, DataColumn)
     
     ExtPrjType      = GetDataAndSetNext(i, DataColumn)
 
@@ -81,13 +101,145 @@ Sub BuildPrj()
     ExtPrjModeCntUB = GetDataAndSetNext(i, DataColumn)
 
     ' project 시트에 프로젝트를 생성한다.
-    MakePrj (100)
+    MakePrj (Problem)
     
 End Sub
 
+Public Function max(x, y As Variant) As Variant
+    max = IIf(x > y, x, y)
+End Function
 
 ' sCnt : 발생시킬 시나리오의 갯수
 Sub MakePrj(sCnt As Integer)
+
+    Dim prjArr() As Variant ' 프로젝트를 담을 버퍼
+    Redim prjArr(1 to 40, 1 to 10) 'song 사이즈 추후 확정
+
+    Dim activityCnt As Integer
+
+    prjArr(1,1) = "순번"
+    prjArr(1,1) = 1
+
+    prjArr(2,1) = "기간" 
+    prjArr(2,2) = Int(Rnd() * 100 Mod 12) + 1 ' 기간은 12개월 이내
+
+    prjArr(3,1) = "ActivityCnt" 
+    activityCnt = Int(Rnd() * 100 Mod 6) + 1 ' song 비율은 추후 수정
+    prjArr(3,2) = activityCnt
+
+    ' 헤더들을 적어준다. song 맨 위에만 적어 주면 될듯 하다.
+    prjArr(4,2) = "Dur"
+    prjArr(4,3) = "start"
+    prjArr(4,4) = "end"
+    prjArr(4,5) = "HR_H"
+    prjArr(4,6) = "HR_M"
+    prjArr(4,7) = "HR_L"
+
+    '1. 헤더와 1열의 내용을 채운다.
+    '2. 활동별 duration 구한다.
+    '3. 선후 관계를 구한다.
+    '4. 총 활동 기간을 구한다.
+    '5. HR을 배정한다.
+    '6. 엑셀 화면에 출력한다.
+    '
+    '1. 1열의 내용을 채운다.
+    Dim i As Integer
+    For i = 1 to 6 ' Activity 1 ~6
+
+        Dim strAct As String
+        Dim strNum As String
+
+        strNum    = Format(i,"#0")
+        strAct = "Activity" & strNum  
+        prjArr(4+i ,1) = strAct
+        
+    Next
+
+    '2. 활동별 duration 구한다.
+    For i = 1 to activityCnt '
+        prjArr(4+i , 2) = Int(Rnd() * 100 Mod 4) + 1 'duration song 비율은 추후 수정        
+        
+        If i = 1 Then ' 첫 활동은 선후관계 없이 시작
+            prjArr(4+i , 3) = 0
+            prjArr(4+i , 4) = prjArr(4+i , 2)
+        End If
+    Next
+
+    '3. 활동이 2개 이상이면 선후 관계를 구한다.
+    For i = 1 to activityCnt ' i 는 프로젝트의 총 activity 갯수
+        Dim temp As Integer
+        Dim current As Integer
+        Dim result As Integer
+
+        Dim j  As Integer
+        Dim k As Integer
+
+
+        If i = 1 Then ' i가 1이면 통과
+            
+        Else ' i 가 1보다 크면 위와 선후관계 비교
+            prjArr(4+i,3)   = 0
+
+            For j = 1 to (i-1)
+
+                k = Int(Rnd()*100) 
+                If k > 10 Then ' 연관관계 있음
+                    ' 연관관계있는 것의 완료일과 나의 시작일중 큰것으로 교체
+                    temp            = prjArr(4+j, 4)' 위에것의 완료일
+                    current         = prjArr(4+i, 3)' 나의 시작일
+                    result          = max(temp,current)
+                    prjArr(4+i,3)   = result ' 시작일 교체
+                    prjArr(4+i,4)   = prjArr(4+i,2) + prjArr(4+i,3)'완료일 교체
+                
+                Else ' 다른 활동과 연관 없음. ***song 일단 첫달부터 시작하는 걸로
+                    prjArr(4+i,3)   = 0 ' 시작일 교체
+                    prjArr(4+i,4)   = prjArr(4+i,2) + prjArr(4+i,3)'완료일 교체
+                
+                End If
+            Next                
+            
+        End If
+        
+    Next
+ 
+
+    '4. 총 활동 기간을 구한다.
+    Dim test As Integer        
+    Dim testresult As Integer
+
+    For i = 1 to activityCnt '
+        test = prjArr(4+i,2) 
+        testresult = test + testresult        
+    Next
+    prjArr(2,2) = testresult
+
+    '5. 엑셀 화면에 출력
+    Dim sheetPrj        As Worksheet
+    Set sheetPrj    = Worksheets("project")    
+    With sheetPrj   
+        Dim endRow As Long ' 마지막행
+        Dim endCol As Long ' 마지막열
+        endRow = .UsedRange.Rows.Count + .UsedRange.Row - 1
+        endCol = .UsedRange.Columns.Count + .UsedRange.Column - 1
+
+        ' 엑셀 파일의 셀들을 정리한다.    
+        .Range(.Cells(1,1),.Cells(endRow,endCol)).UnMerge
+        .Range(.Cells(1,1),.Cells(endRow,endCol)).Clear
+        '.Range(.Cells(1,1),.Cells(endRow,endCol)).ClearContents 
+      
+        .Range(.Cells(1 , 1),.Cells(40, 10 )).Value = prjArr
+
+    End With 
+
+End Sub
+
+
+Sub Epilogue()
+
+End Sub
+
+
+Sub old_MakePrj(sCnt As Integer)
 
     ' 인덱스 변수들
     Dim s As Integer,  i As Integer,  j As Integer,  k As Integer
@@ -109,7 +261,7 @@ Sub MakePrj(sCnt As Integer)
     
     posX        = 2 ' 언제나 2보다 커야한다. (개월수를 표시할 공간을 위해서)
     posY        = 2
-    headY       = 3             ' 헤더는 3줄이 들어간다.
+    headY       = 3 ' 헤더는 3줄이 들어간다.
     rangeEnd    = posY + headY + SimulTerm - 1 ' 배열 복사할 Range의 끝 위치
  
     ' 사용된 모든 범위에서 마지막셀을 찾아서 병합을 풀고 내용을 지운다.    
@@ -156,7 +308,7 @@ Sub MakePrj(sCnt As Integer)
                 sum = 0
 
                 ' 매달 발생 예상 프로젝트 수
-                For k = 1 To 4
+                For k = 1 To PrjMaxCnt
                     If Rnd < p(j) Then sum = sum + 1
                 Next k
 
@@ -172,10 +324,5 @@ Sub MakePrj(sCnt As Integer)
         End With
 
     Next s
-
-End Sub
-
-
-Sub Epilogue()
 
 End Sub
