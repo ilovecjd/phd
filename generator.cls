@@ -1,5 +1,5 @@
 Option Explicit
-
+Option Base 1
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' 프로그램 동작을 위한 기본 정보들
@@ -37,8 +37,20 @@ Dim ExtPrjModeCntLB As Integer
 Dim ExtPrjModeCntUB As Integer
 
 
-' desc      : 프로그램 시작을 위한 기본적인 값들을 설정한다.
-' return    : none
+Private Sub Generation_Click()
+    
+    Call Prologue()        ' 파라메터를 참조해서 기본적인 데이터를 준비한다.    
+
+    Dim         prjCnt As Integer
+    prjCnt =    MakeDashboard()  ' 대시보드를 생성하고 전체 프로젝트의 갯수를 구한다.
+
+    Call BuildPrj(prjCnt)        ' 프로젝트의 갯수만큼 프로젝트를 생성한다.
+
+End Sub
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'' desc      : 프로그램 시작을 위한 기본적인 값들을 설정한다.
+'' return    : none
 Sub Prologue()
 
     Dim i As Integer
@@ -68,16 +80,121 @@ Sub Prologue()
 End Sub
 
 
-Private Sub Generation_Click()
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'' Desc     : 생성된 프로젝트 배열을 엑셀에 출력하는 함수.
+'' @prjArr  : 프로젝트 정보를 담아서 엑셀에 출력할 배열
+'' Return   : 없음
+Function PrintDashboard(Arr() As Variant)
 
-    Prologue
-    BuildPrj
+    Dim sheetPrj        As Worksheet
+    Set sheetPrj    = Worksheets("dashboard")    
+    With sheetPrj   
+        Dim endRow As Long ' 마지막행
+        Dim endCol As Long ' 마지막열
+        endRow = .UsedRange.Rows.Count + .UsedRange.Row - 1
+        endCol = .UsedRange.Columns.Count + .UsedRange.Column - 1
 
-End Sub
+        ' 엑셀 파일의 셀들을 정리한다.    
+        .Range(.Cells(1,1),.Cells(endRow,endCol)).UnMerge
+        .Range(.Cells(1,1),.Cells(endRow,endCol)).Clear
+        '.Range(.Cells(1,1),.Cells(endRow,endCol)).ClearContents 
+      
+        .Range(.Cells(1 , 1),.Cells(100, 50 )).Value = Arr
 
+        Dim RNG1 As Range
+        ' 테두리그리기
+        Set RNG1 = .Range(.Cells(2,1),.Cells(4,37))
+        RNG1.Borders.LineStyle = 1
+        RNG1.Borders.Weight = xlThin
+        RNG1.Borders.ColorIndex = 1
 
-' desc      : 셀 i,j 의 값을 리턴하고 인덱스 i 값을 다음 인덱스로 증가시킨다.
-' return    : 셀 i,j 의 값  / 증가된  i 값
+        ' 테두리그리기
+        Set RNG1 = .Range(.Cells(12,1),.Cells(19,37))
+        RNG1.Borders.LineStyle = 1
+        RNG1.Borders.Weight = xlThin
+        RNG1.Borders.ColorIndex = 1
+
+        ' 테두리그리기
+        Set RNG1 = .Range(.Cells(22,1),.Cells(29,37))
+        RNG1.Borders.LineStyle = 1
+        RNG1.Borders.Weight = xlThin
+        RNG1.Borders.ColorIndex = 1
+
+        ' 테두리그리기   
+        Set RNG1 = .Range(.Cells(32,1),.Cells(39,37))
+        RNG1.Borders.LineStyle = 1
+        RNG1.Borders.Weight = xlThin
+        RNG1.Borders.ColorIndex = 1
+
+    End With 
+    
+End Function
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'' Desc     : dashboard 시트를 생성하고 값을 기록한다.
+'' @        : 없음
+'' Return   : 생성해야할(기간동안 발생한) 프로젝트의 갯수
+Function MakeDashboard()
+    Dim dashArr() As Variant
+    Redim dashArr(1 to 100 , 1 to 50) ' song 추후 정상적인 값으로 파라메터 값을 수정하자
+
+    Dim i       As Integer
+    Dim sum     As Integer ' 발생한 모든 프로젝트 갯수의 누적치
+    Dim prjCnt  As Integer ' 매달 발생하는 프로젝트 갯수
+
+    dashArr(1,1) = "발주 프로젝트 현황"
+    dashArr(2,1) = "월"
+    dashArr(3,1) = "누계"
+    dashArr(4,1) = "발주"
+
+    sum = 0
+
+    For i = 1 to 36
+
+        prjCnt = Int(Rnd() * 100 Mod 4)' song 비율은 추후 수정
+        sum = sum + prjCnt
+
+        dashArr(2,i+1) = i
+        dashArr(3,i+1) = sum
+        dashArr(4,i+1) = prjCnt
+        
+    Next
+
+    dashArr(11,1) = "진행 프로젝트 현황"
+    dashArr(12,1) = "월"
+    dashArr(13,1) = "합계"
+    dashArr(14,1) = "prjNum"
+
+    For i = 1 to 36
+        dashArr(12,i+1) = i
+    Next
+
+    dashArr(21,1) = "보류 프로젝트 현황"
+    dashArr(22,1) = "월"
+    dashArr(23,1) = "합계"
+    dashArr(24,1) = "prjNum"
+    For i = 1 to 36
+        dashArr(22,i+1) = i
+    Next
+
+    dashArr(31,1) = "완료 프로젝트 현황"
+    dashArr(32,1) = "월"
+    dashArr(33,1) = "합계"
+    dashArr(34,1) = "prjNum"
+    For i = 1 to 36
+        dashArr(32,i+1) = i
+    Next
+
+    Call PrintDashboard(dashArr)
+
+    MakeDashboard = sum
+
+End Function
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'' Desc     : 셀 i,j 의 값을 리턴하고 인덱스 i 값을 다음 인덱스로 증가시킨다.
+'' @i , j   : 값을 가져올 셀의 위치
+'' Return   : 셀(i,j)의 값 / i (증가된  i 값)
 Function GetDataAndSetNext(i As Integer, j As Integer)
 
     GetDataAndSetNext = Cells(i, j)
@@ -86,12 +203,12 @@ Function GetDataAndSetNext(i As Integer, j As Integer)
 End Function
 
 ' desc      : 프로젝트를 위한 변수들을 준비한다.
+'' prjCnt   : 생성해야할 프로젝트의 갯수
 ' return    : none
-Sub BuildPrj()
+Sub BuildPrj(prjCnt As Integer)
 
     Dim i As Integer
     i               = DataIndex
-
     
     ExtPrjType      = GetDataAndSetNext(i, DataColumn)
 
@@ -104,24 +221,30 @@ Sub BuildPrj()
     ExtPrjModeCntLB = GetDataAndSetNext(i, DataColumn)
     ExtPrjModeCntUB = GetDataAndSetNext(i, DataColumn)
 
-    Dim prjArr() As Variant ' 프로젝트를 담을 버퍼
-    Redim prjArr(1 to 40, 1 to 10) 'song 사이즈 추후 확정
-    Dim activityCnt As Integer
+    Dim array_sizeX As Integer ' 배열의 열의 갯수
+    Dim array_sizeY As Integer ' 배열의 행의 갯수
+    Dim prjArr()    As Variant ' 프로젝트를 담을 버퍼
+
+    array_sizeX     = 10                ' Dur	start	end	HR_H	HR_M	HR_L
+
+    ' 헤더 크기 + 프로젝트 갯수 * 프로젝트 구조체의 크기 ( 순번,기간,ActivityCnt,Activity1,Activity2,Activity3,Activity4,Activity5,Activity6)
+    array_sizeY     = 1 + prjCnt * 9   
+
+    Redim prjArr(1 to array_sizeY, 1 to array_sizeX) 'song 사이즈 추후 확정
+    prjArr(1,1) = prjCnt    '생성될 프로젝트이 총 갯수를 적는다
 
     '1. 1열의 내용을 채운다.
     Call MakePrjRow(prjArr)
 
     '2. 프로젝트를 갯수만큼 생성한다.
-    Call MakePrjInfo(prjArr,1)
-    Call MakePrjActivity(prjArr,1)
-    Call MakePrjHR(prjArr,1)
-    
+    For i = 1 to prjCnt
+        Call MakePrjInfo(prjArr,i)
+        Call MakePrjActivity(prjArr,i)
+        Call MakePrjHR(prjArr,i)
+    Next
     
     '3. project 시트에 prjArr를 출력한다.
     Call PrintPrj(prjArr)
-
-    ' project 시트에 프로젝트를 생성한다.
-    'MakePrj (Problem)
     
 End Sub
 
@@ -177,7 +300,6 @@ Function MakePrjActivity(prjArr() As Variant, prjNum As Integer)
     iRow = (prjNum -1)* SIZE_OF_PROJECT + 2'song 예외 처리 필요 (iRow가 1(제목열) 보다 작은경우)
 
     activityCnt = prjArr(iRow + 2, 2)
-
 
     Dim i As Integer
     Dim iActLocation As Integer ' Activity 가 시작되는 위치
@@ -276,8 +398,8 @@ Function MakePrjHR(prjArr() As Variant, prjNum As Integer)
 
     iActLocation = iRow + 2
 
-    Dim rndH As Integer ' 고급 인력이 렌덤하게 선택 될 확율
-    Dim rndM As Integer ' 중급 인력이 렌덤하게 선택 될 확율    
+    Dim rndH As Integer ' 고급 인력이 렌덤하게 선택 될 확율은 0 to rndH
+    Dim rndM As Integer ' 중급 인력이 렌덤하게 선택 될 확율은 rndH to rndM    
     rndH = 20
     rndM = 70
    
@@ -310,6 +432,13 @@ End Function
 '' prjArr : 프로젝트 정보를 담아서 엑셀에 출력할 배열
 Function PrintPrj(prjArr() As Variant)
 
+    Dim array_sizeY As Integer ' 배열의 행의 갯수
+    Dim prjCnt      As Integer    
+    prjCnt          = prjArr(1,1)     '생성될 프로젝트의 총 갯수
+    
+    ' 헤더 크기 + 프로젝트 갯수 * 프로젝트 구조체의 크기 ( 순번,기간,ActivityCnt,Activity1,Activity2,Activity3,Activity4,Activity5,Activity6)
+    array_sizeY     = 1 + prjCnt * 9 'song 전역으로 변경할 변수   
+
     Dim sheetPrj        As Worksheet
     Set sheetPrj    = Worksheets("project")    
     With sheetPrj   
@@ -323,7 +452,7 @@ Function PrintPrj(prjArr() As Variant)
         .Range(.Cells(1,1),.Cells(endRow,endCol)).Clear
         '.Range(.Cells(1,1),.Cells(endRow,endCol)).ClearContents 
       
-        .Range(.Cells(1 , 1),.Cells(40, 10 )).Value = prjArr
+        .Range(.Cells(1 , 1),.Cells(array_sizeY, 10 )).Value = prjArr
 
     End With 
     
@@ -335,149 +464,6 @@ Public Function max(x, y As Variant) As Variant
     max = IIf(x > y, x, y)
 End Function
 
-' sCnt : 발생시킬 시나리오의 갯수
-Sub MakePrj(sCnt As Integer)
-
-    Dim prjArr() As Variant ' 프로젝트를 담을 버퍼
-    Redim prjArr(1 to 40, 1 to 10) 'song 사이즈 추후 확정
-
-    Dim activityCnt As Integer
-
-    prjArr(1,1) = "순번"
-    prjArr(1,1) = 1
-
-    prjArr(2,1) = "기간" 
-    prjArr(2,2) = Int(Rnd() * 100 Mod 12) + 1 ' 기간은 12개월 이내
-
-    prjArr(3,1) = "ActivityCnt" 
-    activityCnt = Int(Rnd() * 100 Mod 6) + 1 ' song 비율은 추후 수정
-    prjArr(3,2) = activityCnt
-
-    ' 헤더들을 적어준다. song 맨 위에만 적어 주면 될듯 하다.
-    prjArr(4,2) = "Dur"
-    prjArr(4,3) = "start"
-    prjArr(4,4) = "end"
-    prjArr(4,5) = "HR_H"
-    prjArr(4,6) = "HR_M"
-    prjArr(4,7) = "HR_L"
-
-    '1. 헤더와 1열의 내용을 채운다.
-    '2. 활동별 duration 구한다.
-    '3. 선후 관계를 구한다.
-    '4. 총 활동 기간을 구한다.
-    '5. HR을 배정한다.
-    '6. 엑셀 화면에 출력한다.
-    '
-    '1. 1열의 내용을 채운다.
-    Dim i As Integer
-    For i = 1 to 6 ' Activity 1 ~6
-
-        Dim strAct As String
-        Dim strNum As String
-
-        strNum    = Format(i,"#0")
-        strAct = "Activity" & strNum  
-        prjArr(4+i ,1) = strAct
-        
-    Next
-
-    '2. 활동별 duration 구한다.
-    For i = 1 to activityCnt '
-        prjArr(4+i , 2) = Int(Rnd() * 100 Mod 4) + 1 'duration song 비율은 추후 수정        
-        
-        If i = 1 Then ' 첫 활동은 선후관계 없이 시작
-            prjArr(4+i , 3) = 0
-            prjArr(4+i , 4) = prjArr(4+i , 2)
-        End If
-    Next
-
-    '3. 활동이 2개 이상이면 선후 관계를 구한다.
-    For i = 1 to activityCnt ' i 는 프로젝트의 총 activity 갯수
-        Dim temp As Integer
-        Dim current As Integer
-        Dim result As Integer
-
-        Dim j  As Integer
-        Dim k As Integer
-
-
-        If i = 1 Then ' i가 1이면 통과
-            
-        Else ' i 가 1보다 크면 위와 선후관계 비교
-            prjArr(4+i,3)   = 0
-
-            For j = 1 to (i-1)
-
-                k = Int(Rnd()*100) 
-                If k > 10 Then ' 연관관계 있음
-                    ' 연관관계있는 것의 완료일과 나의 시작일중 큰것으로 교체
-                    temp            = prjArr(4+j, 4)' 위에것의 완료일
-                    current         = prjArr(4+i, 3)' 나의 시작일
-                    result          = max(temp,current)
-                    prjArr(4+i,3)   = result ' 시작일 교체
-                    prjArr(4+i,4)   = prjArr(4+i,2) + prjArr(4+i,3)'완료일 교체
-                
-                Else ' 다른 활동과 연관 없음. ***song 일단 첫달부터 시작하는 걸로
-                    prjArr(4+i,3)   = 0 ' 시작일 교체
-                    prjArr(4+i,4)   = prjArr(4+i,2) + prjArr(4+i,3)'완료일 교체
-                
-                End If
-            Next                
-            
-        End If
-        
-    Next
- 
-
-    '4. 총 활동 기간을 구한다.
-    Dim test As Integer        
-    Dim testresult As Integer
-
-    For i = 1 to activityCnt '
-        test = prjArr(4+i,2) 
-        testresult = test + testresult        
-    Next
-    prjArr(2,2) = testresult
-
-
-    '5. HR을 배정한다.
-     For i = 1 to activityCnt ' i 는 프로젝트의 총 activity 갯수
-        k = Int(Rnd() *100)
-        If k > 10
-            prjArr(4+i,3)   = Int(Rnd()*100) 'HR_H
-        End If
-        
-        k = Int(Rnd() *100)
-        If k > 10
-            prjArr(4+i,3)   = 0 'HR_M
-        End If
-        
-        k = Int(Rnd() *100)
-        If k > 10
-            prjArr(4+i,3)   = 0 'HR_L
-        End If
-         
-     Next
-
-    '6. 엑셀 화면에 출력
-    Dim sheetPrj        As Worksheet
-    Set sheetPrj    = Worksheets("project")    
-    With sheetPrj   
-        Dim endRow As Long ' 마지막행
-        Dim endCol As Long ' 마지막열
-        endRow = .UsedRange.Rows.Count + .UsedRange.Row - 1
-        endCol = .UsedRange.Columns.Count + .UsedRange.Column - 1
-
-        ' 엑셀 파일의 셀들을 정리한다.    
-        .Range(.Cells(1,1),.Cells(endRow,endCol)).UnMerge
-        .Range(.Cells(1,1),.Cells(endRow,endCol)).Clear
-        '.Range(.Cells(1,1),.Cells(endRow,endCol)).ClearContents 
-      
-        .Range(.Cells(1 , 1),.Cells(40, 10 )).Value = prjArr
-
-    End With 
-
-End Sub
 
 
 Sub Epilogue()
