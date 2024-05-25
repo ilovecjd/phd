@@ -12,13 +12,22 @@ Option Explicit
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' 프로젝트 클래스
 
-  Public Dim index       As Integer
-  Public Dim type        As Integer
-  Public Dim orderMonth  As Integer
-  Public Dim startMontj  As Integer
-  Public Dim status      As Integer
-  Public Dim actCnt      As Integer
+Private sizeOfVariables   As Integer ' 변수들의 크기
+Public prjNum             As Integer  
+Public periods            As Integer
+Public ActivityCnt        As Integer
+Public Activity1          As Integer
+Public Activity2          As Integer
+Public Activity3          As Integer
+Public Activity4          As Integer
+Public Activity5          As Integer
+Public Activity6          As Integer
+
+Public Sub Init()
+
+End Sub
+
+Sub Name()
   
-  Public Sub Init
-      msgbox "Init"
-  End Sub
+End Sub
+
