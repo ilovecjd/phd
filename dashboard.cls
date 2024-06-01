@@ -6,17 +6,72 @@ Private Sub CommandButton1_Click()
     ' 전역 변수 설정
     ' 월별 선택 가능프로젝트 확인
     'GenerateCombinations
-     CirculateMonth
-    ' Dim cProject As New clsProject 
-    ' cProject.Init
-    ' cProject.index = 1
-    ' Debug.Print cProject.index
+    CirculateMonth ' 월별 진행 프로젝트 현황 표를 생성한다.
+    'Call BuildPrj(10)
+    Dim arrAllPrj(10) As clsProject  
+	Dim i As Integer
+	For i = 1 to 10
+		Set arrAllPrj(i) = New clsProject
+		Call arrAllPrj(i).Init(0, i, "project2",2)    'Init(initType As Integer, initNum As Integer, sheetName As String)
+		Call arrAllPrj(i).PrintInfo()	
 
-    ' cProject.index = 999
-    ' Debug.Print cProject.index
+	Next
+    'Dim cProject As New clsProject 
+    ' Call cProject.Init(0, 1, "project2")    'Init(initType As Integer, initNum As Integer, sheetName As String)
+	' Call cProject.PrintInfo()	
 
+  
 End Sub
 
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'' 프로젝트의 기본 정보를 생성한다.
+'' @prjArr : 프로젝트 정보를 담아서 엑셀에 출력할 배열
+'' @prjNum : 프로젝트 번호
+Function buildPrjInfo(prjArr() As Variant, prjNum As Integer)
+   
+    ' 첫 행을 적어준다. 
+    Dim activityCnt As Integer    
+    Dim iRow As Integer ' 프로젝트가 위치할 배열의 첫 행 번호
+
+    iRow = (prjNum -1)* SIZE_OF_PROJECT + 2'song 예외 처리 필요 (iRow가 1(제목열) 보다 작은경우)
+
+    prjArr(iRow,1) = "순번"
+    prjArr(iRow,2) = prjNum
+
+    prjArr(iRow+1,1) = "기간" 
+    prjArr(iRow+1,2) = Int(Rnd() * 100 Mod 12) + 1 ' 기간은 12개월 이내
+
+    prjArr(iRow+2,1) = "ActivityCnt" 
+    activityCnt = Int(Rnd() * 100 Mod 6) + 1 ' song 비율은 추후 수정
+    prjArr(iRow+2,2) = activityCnt
+
+End Function
+
+Function BuildPrj(prjCnt As Integer)
+
+    Dim project As typeProject
+    Dim arrPrj() As typeProject
+    ReDim rrPrj(1 to prjCnt)
+
+    Dim i As Integer
+    For i = 1 to prjCnt
+        project = arrPrj(i)
+        project.num = i
+        period  = 
+        orderDate
+        possibleDate
+        startDate
+        profit
+        experience
+        successPercentage
+        CF
+        N_CF
+        
+    Next
+
+
+    
+End Function
 Sub GenerateCombinations()
     Dim ws As Worksheet
     Set ws = ThisWorkbook.Sheets("dashboard") ' 적절한 시트 이름으로 변경
@@ -226,3 +281,5 @@ Sub UpdateProject(month As Integer)
     
 
 End Sub    
+
+

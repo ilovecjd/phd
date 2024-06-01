@@ -461,10 +461,6 @@ End Function
 
 
 
-Public Function max(x, y As Variant) As Variant
-    max = IIf(x > y, x, y)
-End Function
-
 
 
 Sub Epilogue()
