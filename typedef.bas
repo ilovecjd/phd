@@ -3,7 +3,7 @@ Option Explicit
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' #define
-Public Const MAX_ACT    As Integer	= 5	 ' 최대 활동의 수
+Public Const MAX_ACT    As Integer	= 6	 ' 최대 활동의 수
 Public Const MAX_N_CF   As Integer  = 4	 ' 최대 CF의 갯수 (개발비를 최대로 나누어 받는 횟수)
 Public Const W_INFO		As Integer 	= 12 ' 출력할 가로의 크기
 Public Const H_INFO 	As Integer 	= 8  ' 출력할 세로의 크기

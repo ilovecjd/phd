@@ -14,37 +14,37 @@ Option Explicit
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 ' 출력에 필요한 환경 변수들
-Public SheetName As String ' 출력할 시트 이름
-Public InfoWidth As Integer ' 출력할 시트의 가로 크기
-Public InfoHeight As Integer ' 출력할 시트의 세로 크기
+Public SheetName			As String ' 출력할 시트 이름
+Public InfoWidth 			As Integer ' 출력할 시트의 가로 크기
+Public InfoHeight 			As Integer ' 출력할 시트의 세로 크기
 Private ProjectInfo(1 To H_INFO, 1 To W_INFO) As Variant ' 출력할 헤더를 기록하는 배열
 
 ' 프로젝트 속성
-Public ProjectType As Integer ' 프로젝트 타입 (0: 외부 / 1: 내부)
-Public ProjectNum As Integer ' 프로젝트의 번호
-Public ProjectDuration As Integer ' 프로젝트의 총 기간
+Public ProjectType			As Integer ' 프로젝트 타입 (0: 외부 / 1: 내부)
+Public ProjectNum 			As Integer ' 프로젝트의 번호
+Public ProjectDuration		As Integer ' 프로젝트의 총 기간
 
-Public OrderDate As Integer ' 발주일
-Public PossibleStartDate As Integer ' 시작 가능일
-Public StartDate As Integer ' 시작일 (0: 미시작)
+Public OrderDate 			As Integer ' 발주일
+Public PossibleStartDate 	As Integer ' 시작 가능일
+Public StartDate 			As Integer ' 시작일 (0: 미시작)
 
-Public Profit As Double ' 총 기대 수익 (HR 종속)
-Public Experience As Integer ' 경험 (0: 무경험 1: 유경험)
-Public SuccessProbability As Integer ' 성공 확률
+Public Profit 				As Double ' 총 기대 수익 (HR 종속)
+Public Experience 			As Integer ' 경험 (0: 무경험 1: 유경험)
+Public SuccessProbability 	As Integer ' 성공 확률
 
 ' 활동
-Public NumActivities As Integer ' 총 활동 수
+Public NumActivities 		As Integer ' 총 활동 수
 Private Activities(1 To MAX_ACT) As Activity ' 활동에 관한 정보를 기록하는 배열
 
 ' 현금 흐름
-Public NumCashFlows As Integer ' 비용 지급 횟수
+Public NumCashFlows 		As Integer ' 비용 지급 횟수
 Private CashFlows(1 To MAX_N_CF) As Integer ' 용역비를 받는 비율을 기록하는 배열
-Public FirstPayment As Long ' 선금 액수
-Public MiddlePayment As Long ' 2차 지급 액수
-Public FinalPayment As Long ' 3차 지급 액수
-Public FirstPaymentMonth As Integer ' 선금 지급 월
-Public MiddlePaymentMonth As Integer ' 2차 지급 월
-Public FinalPaymentMonth As Integer ' 3차 지급 월
+Public FirstPayment 		As Long ' 선금 액수
+Public MiddlePayment 		As Long ' 2차 지급 액수
+Public FinalPayment 		As Long ' 3차 지급 액수
+Public FirstPaymentMonth 	As Integer ' 선금 지급 월
+Public MiddlePaymentMonth	As Integer ' 2차 지급 월
+Public FinalPaymentMonth 	As Integer ' 3차 지급 월
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' Desc     : Project 클래스의 초기화
@@ -54,13 +54,13 @@ Public FinalPaymentMonth As Integer ' 3차 지급 월
 ' ODate    : 프로젝트가 발생한 달
 Public Sub Init(initType As Integer, initNum As Integer, shtName As String, ODate As Integer)
     ' 상수 값 설정
-    InfoWidth = W_INFO
-    InfoHeight = H_INFO
+    InfoWidth 	= W_INFO
+    InfoHeight 	= H_INFO
 
     ' 전달받은 값들로 초기화
     ProjectType = initType
-    ProjectNum = initNum
-    SheetName = shtName
+    ProjectNum 	= initNum
+    SheetName 	= shtName
 
     ' 1번 프로젝트 생성 시 프로젝트 시트의 헤더를 만든다.
     If initNum = 1 Then
@@ -68,13 +68,13 @@ Public Sub Init(initType As Integer, initNum As Integer, shtName As String, ODat
     End If
 
     ' 프로젝트 생성을 위해 필요한 값들을 생성한다.
-    OrderDate = ODate ' 발주월
-    PossibleStartDate = ODate + Int(Rnd() * 4) ' 시작 가능일
-    StartDate = 0 ' 시작일 (0: 미시작)
-    Profit = 100 ' 총 기대 수익 (HR 종속 MakeProjectHRandProfit 함수에서 생성)
-    Experience = GenerateWithProbability(95) ' 경험 (0: 무경험 1: 유경험)
-    SuccessProbability = 100 ' 성공 확률
-    NumCashFlows = MAX_N_CF ' 비용 지급 횟수 (규모에 따라 변경 가능)
+    OrderDate 			= ODate ' 발주월
+    PossibleStartDate 	= ODate + Int(Rnd() * 4) ' 시작 가능일
+    StartDate 			= 0 ' 시작일 (0: 미시작)
+    Profit 				= 100 ' 총 기대 수익 (HR 종속 MakeProjectHRandProfit 함수에서 생성)
+    Experience 			= GenerateWithProbability(95) ' 경험 (0: 무경험 1: 유경험)
+    SuccessProbability	= 100 ' 성공 확률
+    NumCashFlows 		= MAX_N_CF ' 비용 지급 횟수 (규모에 따라 변경 가능)
 
     Call CreateActivities ' 활동과 상호 선후 관계 생성, 프로젝트 전체 기간 갱신
     Call CalculateHRandProfit ' 활동별 투입 인력 생성, 프로젝트 전체 기대 수익 생성 및 기록
@@ -95,26 +95,26 @@ Public Function CreateActivities()
     totalDuration = Int(3 * Rnd + 1)
 
     For i = 1 To NumActivities
-        Dim temp As Integer
-        Dim current As Integer
-        Dim result As Integer
-        Dim j As Integer
-        Dim k As Integer
+        Dim temp 	As Integer
+        Dim current	As Integer
+        Dim result 	As Integer
+        Dim j 		As Integer
+        Dim k 		As Integer
 
-        Activities(i).Duration = Int(Rnd() * 4) + 1 ' 활동 기간
+        Activities(i).Duration 	= Int(Rnd() * 4) + 1 ' 활동 기간
 
-        Activities(i).StartDate = 0
-        Activities(i).EndDate = Activities(i).Duration
+        Activities(i).StartDate	= 0
+        Activities(i).EndDate 	= Activities(i).Duration
 
         If i > 1 Then
             For j = 1 To (i - 1)
                 k = Int(Rnd() * 100)
                 If k > 50 Then
-                    temp = Activities(j).EndDate
-                    current = Activities(i).StartDate
-                    result = max(temp, current)
+                    temp 					= Activities(j).EndDate
+                    current 				= Activities(i).StartDate
+                    result 					= max(temp, current)
                     Activities(i).StartDate = result
-                    Activities(i).EndDate = Activities(i).StartDate + Activities(i).Duration
+                    Activities(i).EndDate 	= Activities(i).StartDate + Activities(i).Duration
                 End If
             Next j
         End If
@@ -137,18 +137,18 @@ Function CalculateHRandProfit()
     For i = 1 To NumActivities
         j = Int(Rnd() * 100)
         If (0 < j) And (j <= RND_HR_H) Then
-            Activities(i).HighSkill = 1
+            Activities(i).HighSkill	= 1
         ElseIf (RND_HR_H < j) And (j <= RND_HR_M) Then
-            Activities(i).MidSkill = 1
+            Activities(i).MidSkill 	= 1
         Else
-            Activities(i).LowSkill = 1
+            Activities(i).LowSkill 	= 1
         End If
     Next i
 
     For i = 1 To NumActivities
-        high = high + Activities(i).HighSkill * Activities(i).Duration
-        mid = mid + Activities(i).MidSkill * Activities(i).Duration
-        low = low + Activities(i).LowSkill * Activities(i).Duration
+        high	= high + Activities(i).HighSkill * Activities(i).Duration
+        mid		= mid  + Activities(i).MidSkill  * Activities(i).Duration
+        low 	= low  + Activities(i).LowSkill  * Activities(i).Duration
     Next i
 
     Profit = CalculateTotalLaborCost(high, mid, low)
@@ -157,13 +157,13 @@ End Function
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' Desc : 등급별 투입인력 계산 및 프로젝트의 수익 생성
 Public Function CalculateTotalLaborCost(highCount As Integer, midCount As Integer, lowCount As Integer) As Integer
-    Dim highLaborCost As Integer
-    Dim midLaborCost As Integer
-    Dim lowLaborCost As Integer
+    Dim highLaborCost	As Integer
+    Dim midLaborCost 	As Integer
+    Dim lowLaborCost 	As Integer
 
-    highLaborCost = CalculateLaborCost("H") * highCount
-    midLaborCost = CalculateLaborCost("M") * midCount
-    lowLaborCost = CalculateLaborCost("L") * lowCount
+    highLaborCost	= CalculateLaborCost("H") * highCount
+    midLaborCost 	= CalculateLaborCost("M") * midCount
+    lowLaborCost 	= CalculateLaborCost("L") * lowCount
 
     CalculateTotalLaborCost = highLaborCost + midLaborCost + lowLaborCost
 End Function
@@ -171,10 +171,10 @@ End Function
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' Desc : 등급별 투입인력에 따른 수익 계산
 Private Function CalculateLaborCost(grade As String) As Integer
-    Dim directLaborCost As Integer
-    Dim overheadCost As Integer
-    Dim technicalFee As Integer
-    Dim totalLaborCost As Integer
+    Dim directLaborCost	As Integer
+    Dim overheadCost 	As Integer
+    Dim technicalFee 	As Integer
+    Dim totalLaborCost 	As Integer
 
     grade = UCase(grade)
 
@@ -190,9 +190,9 @@ Private Function CalculateLaborCost(grade As String) As Integer
             Exit Function
     End Select
 
-    overheadCost = directLaborCost * 0.6
-    technicalFee = (directLaborCost + overheadCost) * 0.2
-    totalLaborCost = directLaborCost + overheadCost + technicalFee
+    overheadCost 	= directLaborCost * 0.6
+    technicalFee 	= (directLaborCost + overheadCost) * 0.2
+    totalLaborCost	= directLaborCost + overheadCost + technicalFee
 
     CalculateLaborCost = totalLaborCost
 End Function
@@ -200,9 +200,9 @@ End Function
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' Desc : 대금 지급 조건 생성
 Public Function CalculatePaymentSchedule()
-    Dim paymentType As Integer
-    Dim paymentRatio As Integer
-    Dim totalPayments As Integer
+    Dim paymentType 	As Integer
+    Dim paymentRatio 	As Integer
+    Dim totalPayments 	As Integer
 
     FirstPaymentMonth = 1
 
@@ -244,40 +244,40 @@ Public Function CalculatePaymentSchedule()
             MiddlePaymentMonth = ProjectDuration
 
         Else
-            paymentRatio = Int(10 * Rnd + 1)
+            paymentRatio 		= Int(10 * Rnd + 1)
             If paymentRatio <= 6 Then
-                FirstPayment = Profit * 0.3
-                MiddlePayment = Profit * 0.3
-                CashFlows(1) = 30
-                CashFlows(2) = 30
-                CashFlows(3) = 40
+                FirstPayment 	= Profit * 0.3
+                MiddlePayment 	= Profit * 0.3
+                CashFlows(1) 	= 30
+                CashFlows(2) 	= 30
+                CashFlows(3) 	= 40
             Else
-                FirstPayment = Profit * 0.3
-                MiddlePayment = Profit * 0.4
-                CashFlows(1) = 30
-                CashFlows(2) = 40
-                CashFlows(3) = 30
+                FirstPayment	= Profit * 0.3
+                MiddlePayment 	= Profit * 0.4
+                CashFlows(1) 	= 30
+                CashFlows(2) 	= 40
+                CashFlows(3) 	= 30
             End If
 
-            FinalPayment = Profit - FirstPayment - MiddlePayment
-            totalPayments = 3
-            MiddlePaymentMonth = WorksheetFunction.Ceiling(ProjectDuration / 2, 1)
-            FinalPaymentMonth = ProjectDuration
+            FinalPayment 		= Profit - FirstPayment - MiddlePayment
+            totalPayments 		= 3
+            MiddlePaymentMonth	= WorksheetFunction.Ceiling(ProjectDuration / 2, 1)
+            FinalPaymentMonth 	= ProjectDuration
         End If
 
     ' 3번 조건: 일한 개월수가 12개월 이상일 때
     Else
-        FirstPayment = Profit * 0.3
-        MiddlePayment = Profit * 0.4
-        FinalPayment = Profit - FirstPayment - MiddlePayment
+        FirstPayment 		= Profit * 0.3
+        MiddlePayment		= Profit * 0.4
+        FinalPayment 		= Profit - FirstPayment - MiddlePayment
 
-        CashFlows(1) = 30
-        CashFlows(2) = 40
-        CashFlows(3) = 30
+        CashFlows(1) 		= 30
+        CashFlows(2) 		= 40
+        CashFlows(3) 		= 30
 
-        totalPayments = 3
-        MiddlePaymentMonth = WorksheetFunction.Ceiling(ProjectDuration / 2, 1)
-        FinalPaymentMonth = ProjectDuration
+        totalPayments 		= 3
+        MiddlePaymentMonth	= WorksheetFunction.Ceiling(ProjectDuration / 2, 1)
+        FinalPaymentMonth 	= ProjectDuration
     End If
 
     NumCashFlows = totalPayments ' 지급 횟수
@@ -311,26 +311,29 @@ End Function
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' Desc : 프로젝트들을 출력할 엑셀 시트에 헤더를 생성한다.
 Public Function PrintHeader()
-    Dim MyArray() As String, strHeader As String
-    Dim sheetPrj As Worksheet
-    Set sheetPrj = Worksheets(SheetName)
+
+    Dim MyArray() 	As String, strHeader As String
+    Dim sheetPrj 	As Worksheet
+
+    Set sheetPrj 	= Worksheets(SheetName)
     With sheetPrj
-        strHeader = "타입 순번 발주일 시작가능 기간 시작 수익 경험 성공% CF1% CF2% CF3%"
-        MyArray = Split(strHeader)
+        strHeader	= "타입 순번 발주일 시작가능 기간 시작 수익 경험 성공% CF1% CF2% CF3%"
+        MyArray 	= Split(strHeader)
         .Range(.Cells(1, 1), .Cells(1, InfoWidth)).Value = MyArray
 
-        strHeader = "Dur start end HR_H HR_M HR_L mon_cf1 mon_cf2 mon_cf3"
-        MyArray = Split(strHeader)
+        strHeader 	= "Dur start end HR_H HR_M HR_L mon_cf1 mon_cf2 mon_cf3"
+        MyArray 	= Split(strHeader)
         .Range(.Cells(2, 1), .Cells(2, InfoWidth)).Value = MyArray
     End With
+
 End Function
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' Desc : 프로젝트의 모든 정보를 엑셀에 출력한다.
 Public Function PrintInfo()
-    Dim i As Integer
-    Dim posX As Integer ' 출력할 가로 위치
-    Dim posY As Integer ' 출력할 세로 위치
+    Dim i 		As Integer
+    Dim posX	As Integer ' 출력할 가로 위치
+    Dim posY 	As Integer ' 출력할 세로 위치
 
     ' 기본 정보 출력
     posX = 1: posY = 1: ProjectInfo(posY, posX) = ProjectType ' 프로젝트 타입 (0: 외부 / 1: 내부)
@@ -369,7 +372,9 @@ Public Function PrintInfo()
     Next i
 
     Dim sheetPrj As Worksheet
+
     Set sheetPrj = Worksheets(SheetName)
+
     posY = (ProjectNum - 1) * InfoHeight + 3
 
     With sheetPrj
@@ -378,4 +383,5 @@ Public Function PrintInfo()
         RNG1.Value = ProjectInfo
         RNG1.BorderAround LineStyle:=1, Weight:=xlThin, ColorIndex:=1 ' 테두리 그리기
     End With
+
 End Function
