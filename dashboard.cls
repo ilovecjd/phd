@@ -6,16 +6,63 @@ Private Sub CommandButton1_Click()
     ' 전역 변수 설정
     ' 월별 선택 가능프로젝트 확인
     'GenerateCombinations
-    CirculateMonth ' 월별 진행 프로젝트 현황 표를 생성한다.
+    'CirculateMonth ' 월별 진행 프로젝트 현황 표를 생성한다.
     'Call BuildPrj(10)
-    Dim arrAllPrj(10) As clsProject  
-	Dim i As Integer
-	For i = 1 to 10
-		Set arrAllPrj(i) = New clsProject
-		Call arrAllPrj(i).Init(0, i, "project2",2)    'Init(initType As Integer, initNum As Integer, sheetName As String)
-		Call arrAllPrj(i).PrintInfo()	
+
+	Dim ws 				As Worksheet
+	Dim month 			As Integer
+	Dim i 				As Integer
+	Dim j 				As Integer
+	Dim endPrjNum		As Integer
+	Dim preTotal		As Integer
+	Dim prjNUm			As Integer
+	Dim arrAllPrj() 	As clsProject  
+	Dim totalPrjNum	As Integer	
+
+    Set ws 				= ThisWorkbook.Sheets("dashboard") ' 적절한 시트 이름으로 변경 
+	totalPrjNum   		= ws.Cells(3, 37).Value
+	Redim arrAllPrj(1 to totalPrjNum)
+
+    
+
+	' For i = 1 to totalPrjNum
+	' 	Set arrAllPrj(i) = New clsProject
+	' 	Call arrAllPrj(i).Init(0, mon, "project2",2)    'Init(initType As Integer, initNum As Integer, sheetName As String)
+	' 	Call arrAllPrj(i).PrintInfo()
+	' Next
+
+	For i =2 to 37 
+		month 		= ws.Cells(2,i ) ' 월
+		endPrjNum 	= ws.Cells(3,i ) ' 이번달까지 누계는 마지막 번호
+
+		If i=2 Then ' 처음이면 초기값을
+			preTotal 	= 0' 이전누계	
+		Else
+			preTotal 	= ws.Cells(3,i-1 )' 이전누계				
+		End If
+
+		prjNUm = preTotal + 1 ' 시작프로젝트 번호
+
+		If prjNUm = 0 Then
+			GoTo Continue 
+		End If
+
+		If prjNUm > endPrjNum Then
+			GoTo Continue 
+		End If	
+
+		For j = prjNUm to endPrjNum ' 
+			Set arrAllPrj(j) = New clsProject
+			Call arrAllPrj(j).Init(0, j, "project2",month)    'Init(initType As Integer, initNum As Integer, sheetName As String)
+			Call arrAllPrj(j).PrintInfo()
+		Next
+
+
+		Continue: 
+
 
 	Next
+
     'Dim cProject As New clsProject 
     ' Call cProject.Init(0, 1, "project2")    'Init(initType As Integer, initNum As Integer, sheetName As String)
 	' Call cProject.PrintInfo()	
