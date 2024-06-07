@@ -35,6 +35,8 @@ Public SuccessProbability 	As Integer ' 성공 확률
 ' 활동
 Public NumActivities 		As Integer ' 총 활동 수
 Private Activities(1 To MAX_ACT) As Activity ' 활동에 관한 정보를 기록하는 배열
+Private PrjAttribute()			As Variant ' activity_struct 시트에서 프로젝트 속성을 읽어올 배력
+Private PatAttribute()			As Variant ' activity_struct 시트에서 패턴 속성을 읽어올 배열
 
 ' 현금 흐름
 Public NumCashFlows 		As Integer ' 비용 지급 횟수
@@ -53,6 +55,7 @@ Public FinalPaymentMonth 	As Integer ' 3차 지급 월
 ' shtName: 출력할 시트의 이름
 ' ODate    : 프로젝트가 발생한 달
 Public Sub Init(initType As Integer, initNum As Integer, shtName As String, ODate As Integer)
+
     ' 상수 값 설정
     InfoWidth 	= W_INFO
     InfoHeight 	= H_INFO
@@ -68,63 +71,248 @@ Public Sub Init(initType As Integer, initNum As Integer, shtName As String, ODat
     End If
 
     ' 프로젝트 생성을 위해 필요한 값들을 생성한다.
-    OrderDate 			= ODate ' 발주월
+    OrderDate 			= ODate 	' 발주월
     PossibleStartDate 	= ODate + Int(Rnd() * 4) ' 시작 가능일
-    StartDate 			= 0 ' 시작일 (0: 미시작)
-    Profit 				= 100 ' 총 기대 수익 (HR 종속 MakeProjectHRandProfit 함수에서 생성)
+    StartDate 			= 0 		' 시작일 (0: 미시작)
+    'Profit 				= 100 	' 총 기대 수익 (HR 종속 MakeProjectHRandProfit 함수에서 생성)
     Experience 			= GenerateWithProbability(95) ' 경험 (0: 무경험 1: 유경험)
-    SuccessProbability	= 100 ' 성공 확률
-    NumCashFlows 		= MAX_N_CF ' 비용 지급 횟수 (규모에 따라 변경 가능)
+    SuccessProbability	= 100 		'   수주 성공 확률
+    NumCashFlows 		= MAX_N_CF 	' 비용 지급 횟수 (규모에 따라 변경 가능)
 
-    Call CreateActivities ' 활동과 상호 선후 관계 생성, 프로젝트 전체 기간 갱신
-    Call CalculateHRandProfit ' 활동별 투입 인력 생성, 프로젝트 전체 기대 수익 생성 및 기록
-    Call CalculatePaymentSchedule ' 대금 지급 조건 생성
+    Call CreateActivities 			' 활동과 상호 선후 관계 생성, 프로젝트 전체 기간 갱신
+    Call CalculateHRandProfit 		' 활동별 투입 인력 생성, 프로젝트 전체 기대 수익 생성 및 기록
+    Call CalculatePaymentSchedule	' 대금 지급 조건 생성
+
 End Sub
 
+' 프로젝트와 패턴을 배열에 담아 온다.
+Public Function SetProjectEnv()
+	Dim dataSheetName As String
+	dataSheetName = "activity_struct"
+
+	Dim dataSheet As Worksheet
+	Set dataSheet = ThisWorkbook.Sheets(dataSheetName)
+
+	ReDim PrjAttribute(1 to 5, 1 to 14 )
+	ReDim PatAttribute(1 to 6, 1 to 27)
+
+	With dataSheet
+		PrjAttribute	= .Range(.Cells(3,1),.Cells(7,14)).Value
+		PatAttribute	= .Range(.Cells(15,1),.Cells(20,27)).Value
+	END With
+
+End Function
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' Desc : 활동 생성, 활동 선후 관계, 프로젝트 전체 기간 갱신
 Public Function CreateActivities()
+
     Randomize ' 난수 발생기 초기화
 
-    ' 1. 활동의 갯수 생성
-    NumActivities = Int(Rnd() * MAX_ACT) + 1
+	Call SetProjectEnv()
 
-    ' 2. 활동의 기간을 생성한다
-    Dim i As Integer
-    Dim totalDuration As Integer ' 프로젝트의 기간 (가장 늦게 끝나는 활동의 종료시점이 프로젝트의 기간이 된다)
-    totalDuration = Int(3 * Rnd + 1)
+    ' 1. 프로젝트 기간 생성에 따른 정해진 타입을 구한다. (Type 1 to 5)
+	Dim prjType 		As Integer
+	Dim patternType 	As Integer
+	Dim i 				As Integer
+	Dim probability		As Integer	
+	Dim Lb 				As Integer
+	Dim UB 				As Integer 
+	Dim maxLoop 		As Integer
+	Dim totalDuration 	As Integer
+	Dim tempDuration 	As Integer
+	
+	prjType 			= 0
+	Lb 					= 0
+	UB 					= 0
 
-    For i = 1 To NumActivities
-        Dim temp 	As Integer
-        Dim current	As Integer
-        Dim result 	As Integer
-        Dim j 		As Integer
-        Dim k 		As Integer
+	probability 		= Int(Rnd() * 100)
+	maxLoop 			= MAX_PRJ_TYPE
 
-        Activities(i).Duration 	= Int(Rnd() * 4) + 1 ' 활동 기간
+	For i = 1 To maxLoop
 
-        Activities(i).StartDate	= 0
-        Activities(i).EndDate 	= Activities(i).Duration
+		UB = UB + PrjAttribute(i,1)
 
-        If i > 1 Then
-            For j = 1 To (i - 1)
-                k = Int(Rnd() * 100)
-                If k > 50 Then
-                    temp 					= Activities(j).EndDate
-                    current 				= Activities(i).StartDate
-                    result 					= max(temp, current)
-                    Activities(i).StartDate = result
-                    Activities(i).EndDate 	= Activities(i).StartDate + Activities(i).Duration
-                End If
-            Next j
-        End If
+		If LB <= probability And probability < UB Then ' 
 
-        totalDuration = max(totalDuration, Activities(i).EndDate)
+			prjType = i	
+			GoTo ContinueA
+
+		End If 
+
+		LB = UB     
+
     Next i
 
-    ' 3. 프로젝트의 전체 기간을 업데이트 한다.
-    ProjectDuration = totalDuration
+	ContinueA:
+
+	' 프로젝트의 전체기간은 최소기간과 최대기간중 선택	
+	LB 				= PrjAttribute(prjType, 4)
+	UB 				= PrjAttribute(prjType, 5)
+	totalDuration	= RandomBetween(LB, UB) 
+	ProjectDuration = totalDuration 'song ==> 둘이 달라지는 경우가 있는지 비교(검증) 하자
+
+
+	' 2. 기간별 생성 가능한 패턴들중 생성될 패턴을 선택한다.	
+	LB 				= 0
+	UB 				= 0
+	maxLoop 		= PrjAttribute(prjType, 6) ' 패턴 갯수
+
+	For i = 1 To maxLoop
+
+		UB = UB + PrjAttribute(prjType, 8 + ((i-1)*2))
+
+		If LB <= probability And probability < UB Then ' 
+
+			patternType = PrjAttribute(prjType,7 + (i-1)*2)	
+			GoTo ContinueB
+
+		End If 
+
+		LB = UB
+      
+    Next i
+
+	ContinueB:
+
+	' 3. 선택된 패턴에서 활동의 갯수와 활동별 기간을 구한다.	
+	' song ==> 예외 처리 겁나 할까 말까?? 
+	LB 				= 0
+	UB 				= 0
+	maxLoop 		= PatAttribute(patternType, 2) ' 패턴안에 있는 활동의 갯수
+	NumActivities = maxLoop
+
+	For i = 1 To maxLoop
+
+		LB 				= LB + PatAttribute(patternType, 3+(i-1)*5)
+		UB 				= UB + PatAttribute(patternType, 4+(i-1)*5)
+		probability 	= RandomBetween(LB, UB) ' 활동이 전체 프로젝트에서 차지하는 기간의 비율. LB와 UB 사이 랜덤한 값을 구한다.
+		tempDuration	= totalDuration * probability / 100	' 활동 기간
+
+		If tempDuration = 0 Then
+			tempDuration = 1			
+		End If
+
+		If i = 1 Then ' 활동1-분석설계 또는 단순업무						
+			' 활동의 기간 생성			
+			Activities(i).Duration 	= tempDuration ' 활동 기간
+        	Activities(i).StartDate	= 1
+        	Activities(i).EndDate 	= tempDuration
+
+		ElseIf i = 2 Then ' 활동2(구현)의 기간은 전체기간 - 활동1의 기간			
+			Activities(i).Duration 	= totalDuration - Activities(1).Duration
+            Activities(i).StartDate = Activities(1).EndDate + 1 
+			Activities(i).EndDate 	= totalDuration
+
+		ElseIf i = 3 Then ' 활동3(통합테스트)
+			Activities(i).Duration 	= tempDuration 
+            Activities(i).StartDate = totalDuration - tempDuration
+            Activities(i).EndDate 	= totalDuration
+
+		Else ' 활동4(단위테스트)
+			Activities(i).Duration 	= tempDuration 
+            Activities(i).StartDate = Activities(3).StartDate - tempDuration - 1
+            Activities(i).EndDate 	= Activities(3).StartDate - 1  			
+		End If
+
+    Next i
+
+
+	' 4. 활동별 인원수를 생성한다.
+
+	' 5. 
+
+
+
+    'NumActivities = 
+	
+
+    ' 2. 활동의 기간을 생성한다
+    ' Dim i As Integer
+    ' Dim totalDuration As Integer ' 프로젝트의 기간 (가장 늦게 끝나는 활동의 종료시점이 프로젝트의 기간이 된다)
+    ' totalDuration = Int(3 * Rnd + 1)
+
+    ' For i = 1 To NumActivities
+    '     Dim temp 	As Integer
+    '     Dim current	As Integer
+    '     Dim result 	As Integer
+    '     Dim j 		As Integer
+    '     Dim k 		As Integer
+
+    '     Activities(i).Duration 	= Int(Rnd() * 4) + 1 ' 활동 기간
+
+    '     Activities(i).StartDate	= 0
+    '     Activities(i).EndDate 	= Activities(i).Duration
+
+    '     If i > 1 Then
+    '         For j = 1 To (i - 1)
+    '             k = Int(Rnd() * 100)
+    '             If k > 50 Then
+    '                 temp 					= Activities(j).EndDate
+    '                 current 				= Activities(i).StartDate
+    '                 result 					= max(temp, current)
+    '                 Activities(i).StartDate = result
+    '                 Activities(i).EndDate 	= Activities(i).StartDate + Activities(i).Duration
+    '             End If
+    '         Next j
+    '     End If
+
+    '     totalDuration = max(totalDuration, Activities(i).EndDate)
+    ' Next i
+
+    ' ' 3. 프로젝트의 전체 기간을 업데이트 한다.
+    ' ProjectDuration = totalDuration
+
 End Function
+
+Public Function RandomBetween(minValue As Integer, maxValue As Integer) As Integer
+    Dim lowerBound As Integer
+    Dim upperBound As Integer
+    
+    ' 난수 발생기 초기화
+    Randomize
+    
+    ' 최소값과 최대값 결정
+    lowerBound = Application.WorksheetFunction.Min(minValue, maxValue)
+    upperBound = Application.WorksheetFunction.Max(minValue, maxValue)
+    
+    ' 최소값과 최대값 사이의 랜덤 값 생성
+    RandomBetween = Int((upperBound - lowerBound + 1) * Rnd + lowerBound)
+End Function
+
+' 프로젝트 타입별로 속성을 설정한다.
+Public Function SetProjectType()
+
+	' 최소기간/최대기간/패턴수/패턴번호1/확률/패턴번호2/확률/.......
+    Dim ProjectType() As Variant
+	ReDim ProjectType(MAX_PRJ_TYPE to 15)
+
+	ProjectType(1,1) = 2 	' 최소기간
+	ProjectType(1,2) = 4 	' 최대기간
+	ProjectType(1,3) = 2 	' 패턴수
+	ProjectType(1,4) = 1 	' 패턴번호 1
+	ProjectType(1,5) = 0.6 	' 패턴1 확율
+	ProjectType(1,6) = 2 	' 패턴번호 2
+	ProjectType(1,7) = 0.4 	' 패턴2 확율
+
+	ProjectType(2,1) = 5 	' 최소기간
+	ProjectType(2,2) = 12 	' 최대기간
+	ProjectType(2,3) = 2 	' 패턴수
+	ProjectType(2,4) = 4 	' 패턴번호 1
+	ProjectType(2,5) = 0.6 	' 패턴1 확율
+	ProjectType(2,6) = 5 	' 패턴번호 2
+	ProjectType(2,7) = 0.4 	' 패턴2 확율
+
+	
+    
+    ' 최소값과 최대값 결정
+    lowerBound = Application.WorksheetFunction.Min(minValue, maxValue)
+    upperBound = Application.WorksheetFunction.Max(minValue, maxValue)
+    
+    ' 최소값과 최대값 사이의 랜덤 값 생성
+    RandomBetween = Int((upperBound - lowerBound + 1) * Rnd + lowerBound)
+End Function
+
+
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' Desc : 활동별 투입 인력 생성, 프로젝트 전체 기대 수익 생성 및 기록
@@ -180,11 +368,11 @@ Private Function CalculateLaborCost(grade As String) As Integer
 
     Select Case grade
         Case "H"
-            directLaborCost = 500
+            directLaborCost = 50
         Case "M"
-            directLaborCost = 390
+            directLaborCost = 39
         Case "L"
-            directLaborCost = 250
+            directLaborCost = 25
         Case Else
             MsgBox "잘못된 등급입니다. 'H', 'M', 'L' 중 하나를 입력하세요."
             Exit Function
@@ -321,7 +509,7 @@ Public Function PrintHeader()
         MyArray 	= Split(strHeader)
         .Range(.Cells(1, 1), .Cells(1, InfoWidth)).Value = MyArray
 
-        strHeader 	= "Dur start end HR_H HR_M HR_L mon_cf1 mon_cf2 mon_cf3"
+        strHeader 	= " Dur start end HR_H HR_M HR_L   mon_cf1 mon_cf2 mon_cf3"
         MyArray 	= Split(strHeader)
         .Range(.Cells(2, 1), .Cells(2, InfoWidth)).Value = MyArray
     End With
@@ -385,3 +573,4 @@ Public Function PrintInfo()
     End With
 
 End Function
+
