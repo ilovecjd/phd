@@ -5,14 +5,14 @@ Option Base 1
 Private Sub CommandButton1_Click()
 
     Dim strTile
-    strTile = Array("ë¹ˆë„","ì‹œë‚˜ë¦¬ì˜¤","ì›”","í”„ë¡œì íŠ¸","ê¸°ê°„","í™œë™ìˆ˜", _ 
-                    "í™œë™","í™œë™ì‹œì‘","í™œë™ë","r1","r2","r3")
+    strTile = Array("ºóµµ", "½Ã³ª¸®¿À", "¿ù", "ÇÁ·ÎÁ§Æ®", "±â°£", "È°µ¿¼ö", _
+                    "È°µ¿", "È°µ¿½ÃÀÛ", "È°µ¿³¡", "r1", "r2", "r3")
 
-    Dim sheetActtmp As Worksheet 
-    set sheetActtmp = Worksheets("act_temp")
+    Dim sheetActtmp As Worksheet
+    Set sheetActtmp = Worksheets("act_temp")
 
     With sheetActtmp
-        .Range(.Cells(1,1),.Cells(1,12)).Value  = strTile
+        .Range(.Cells(1, 1), .Cells(1, 12)).Value = strTile
     End With
 
     Dim freq        As Integer
@@ -20,7 +20,7 @@ Private Sub CommandButton1_Click()
     Dim month       As Integer
     Dim project     As Integer
     Dim prjTime     As Integer
-    Dim actCnt      As Integer    
+    Dim actCnt      As Integer
     Dim actNum      As Integer
     Dim actSTime    As Integer
     Dim actETime    As Integer
@@ -28,69 +28,60 @@ Private Sub CommandButton1_Click()
     Dim r2          As Integer
     Dim r3          As Integer
 
-    freq            = 1
-    scenario        = 2
-    month           = 3
-    project         = 4
-    prjTime         = 5
-    actCnt          = 6
-    actNum          = 7
-    actSTime        = 8
-    actETime        = 9
-    r1              = 10
-    r2              = 11
-    r3              = 12
+    freq = 1
+    scenario = 2
+    month = 3
+    project = 4
+    prjTime = 5
+    actCnt = 6
+    actNum = 7
+    actSTime = 8
+    actETime = 9
+    r1 = 10
+    r2 = 11
+    r3 = 12
 
     Dim h As Integer
     Dim i As Integer
     Dim j As Integer
     Dim k As Integer
 
-    ' ì°¸ê³  : 36ê°œì›” * 5(ìµœëŒ€í”„ë¡œì íŠ¸) * 8(ìµœëŒ€í™œë™) = 1440 ê°œì˜ í™œë™
-    ' 1. ë‹¨ê¸°í”„ë¡œì íŠ¸ - ì „ì²´ í”„ë¡œì íŠ¸ì˜ 60%ë¡œ êµ¬ì„±, ìµœì†Œ 1ê°œì›” ~ ìµœëŒ€ 6ê°œì›” ì´ë‚´
-    ' í”„ë¡œì íŠ¸ ë³„ í™œë™ìˆ˜ë¥¼ êµ¬í•œë‹¤.
+    ' Âü°í : 36°³¿ù * 5(ÃÖ´ëÇÁ·ÎÁ§Æ®) * 8(ÃÖ´ëÈ°µ¿) = 1440 °³ÀÇ È°µ¿
+    ' 1. ´Ü±âÇÁ·ÎÁ§Æ® - ÀüÃ¼ ÇÁ·ÎÁ§Æ®ÀÇ 60%·Î ±¸¼º, ÃÖ¼Ò 1°³¿ù ~ ÃÖ´ë 6°³¿ù ÀÌ³»
+    ' ÇÁ·ÎÁ§Æ® º° È°µ¿¼ö¸¦ ±¸ÇÑ´Ù.
 
-    ' í™œë™ì˜ ìµœëŒ€ìˆ˜ëŠ” 4ê°œë¡œ í•œë‹¤.
+    ' È°µ¿ÀÇ ÃÖ´ë¼ö´Â 4°³·Î ÇÑ´Ù.
 
-    ' í™œë™ìˆ˜ê°€ 1ì´ë©´ ì ì€ ê¸°ê°„ìœ¼ë¡œ ì„¤ì • (2ê°œì›” ì´ë‚´)
+    ' È°µ¿¼ö°¡ 1ÀÌ¸é ÀûÀº ±â°£À¸·Î ¼³Á¤ (2°³¿ù ÀÌ³»)
 
-    ' í™œë™ìˆ˜ê°€ 2ì´ë©´ í™•ìœ¨ì ìœ¼ë¡œ ê²¹ì¹˜ê²Œ í•œë‹¤. (4ê°œì›” ì´ë‚´)
-    ' ë‘ í™œë™ì˜ ê¸°ê°„ì˜ í•©ì€ ìµœì†Œí•œ ì „ì²´ ê¸°ê°„ë³´ë‹¤ ì»¤ì•¼í•œë‹¤.
+    ' È°µ¿¼ö°¡ 2ÀÌ¸é È®À²ÀûÀ¸·Î °ãÄ¡°Ô ÇÑ´Ù. (4°³¿ù ÀÌ³»)
+    ' µÎ È°µ¿ÀÇ ±â°£ÀÇ ÇÕÀº ÃÖ¼ÒÇÑ ÀüÃ¼ ±â°£º¸´Ù Ä¿¾ßÇÑ´Ù.
 
-    ' í™œë™ìˆ˜ê°€ 3 ì´ë©´ (4 ~ 6ê°œì›”)
-    ' 1) 1ë²ˆ í™œë™ì€ ì‹œì‘ìœ¼ë¡œ ë§ˆì§€ë§‰ í™œë™ì€ ëìœ¼ë¡œ ì„¤ì •í•œë‹¤
-    ' 2) 1ë²ˆê³¼ 2ë²ˆ í™œë™ê¸°ê°„ì˜ í•©ì€ ì „ì²´ ê¸°ê°„ì˜ 60%ì„ ë„˜ì§€ ì•ŠëŠ”ë‹¤. 
-    ' 3) ì¤‘ê°„ì˜ í™œë™ì€ í™•ìœ¨ì ìœ¼ë¡œ 1ë²ˆì´ë‚˜ 2ë²ˆê³¼ ê²¹ì¹˜ëŠ” ê¸°ê°„ì„ ê°–ëŠ”ë‹¤.
-    ' 
-    ' í™œë™ìˆ˜ê°€ 4ì´ë©´ (4 ~ 6ê°œì›”)
-    ' 1) 1ë²ˆ í™œë™ì€ ì‹œì‘ìœ¼ë¡œ ë§ˆì§€ë§‰ í™œë™ì€ ëìœ¼ë¡œ ì„¤ì •í•œë‹¤
-    ' 2) 1ë²ˆê³¼ 2ë²ˆ í™œë™ê¸°ê°„ì˜ í•©ì€ ì „ì²´ ê¸°ê°„ì˜ 40%ì„ ë„˜ì§€ ì•ŠëŠ”ë‹¤. 
-    ' 3) ì¤‘ê°„ì˜ í™œë™ì€ í™•ìœ¨ì ìœ¼ë¡œ 1ë²ˆì´ë‚˜ 2ë²ˆê³¼ ê²¹ì¹˜ëŠ” ê¸°ê°„ì„ ê°–ëŠ”ë‹¤.
-    ' 4) ì¤‘ê°„ì˜ í™œë™ê°„ì—ë„ í™•ìœ¨ì ìœ¼ë¡œ ê²¹ì¹˜ëŠ” ê¸°ê°„ì„ ê°–ëŠ”ë‹¤.
+    ' È°µ¿¼ö°¡ 3 ÀÌ¸é (4 ~ 6°³¿ù)
+    ' 1) 1¹ø È°µ¿Àº ½ÃÀÛÀ¸·Î ¸¶Áö¸· È°µ¿Àº ³¡À¸·Î ¼³Á¤ÇÑ´Ù
+    ' 2) 1¹ø°ú 2¹ø È°µ¿±â°£ÀÇ ÇÕÀº ÀüÃ¼ ±â°£ÀÇ 60%À» ³ÑÁö ¾Ê´Â´Ù.
+    ' 3) Áß°£ÀÇ È°µ¿Àº È®À²ÀûÀ¸·Î 1¹øÀÌ³ª 2¹ø°ú °ãÄ¡´Â ±â°£À» °®´Â´Ù.
+    '
+    ' È°µ¿¼ö°¡ 4ÀÌ¸é (4 ~ 6°³¿ù)
+    ' 1) 1¹ø È°µ¿Àº ½ÃÀÛÀ¸·Î ¸¶Áö¸· È°µ¿Àº ³¡À¸·Î ¼³Á¤ÇÑ´Ù
+    ' 2) 1¹ø°ú 2¹ø È°µ¿±â°£ÀÇ ÇÕÀº ÀüÃ¼ ±â°£ÀÇ 40%À» ³ÑÁö ¾Ê´Â´Ù.
+    ' 3) Áß°£ÀÇ È°µ¿Àº È®À²ÀûÀ¸·Î 1¹øÀÌ³ª 2¹ø°ú °ãÄ¡´Â ±â°£À» °®´Â´Ù.
+    ' 4) Áß°£ÀÇ È°µ¿°£¿¡µµ È®À²ÀûÀ¸·Î °ãÄ¡´Â ±â°£À» °®´Â´Ù.
 
-    ' í™œë™ë³„ duration ì„ êµ¬í•œë‹¤.
+    ' È°µ¿º° duration À» ±¸ÇÑ´Ù.
 
     Dim problemSheetName As String
-    Dim Arr()            As Variant
 
-    Arr = Range(Cells(5,2),Cells(40,2))         ' Opt, ML, Pess ì— ë”°ë¼ ì„ íƒ ì˜ì—­ì´ ë³€í•˜ê²Œ ìˆ˜ì •í•´ì•¼í•¨.
+    For i = 1 To 3 ' ¹®Á¦°¹¼ö ¸¸Å­ ½ÃÆ®¸¦ ¸¸µé°í ½ÃÆ®¿¡ ±â·ÏÇÑ´Ù.
 
-    Dim fullArr(1 to 1440,1 to 12) As Variant   ' 1440 ëŒ€ì‹  ë²”ìœ„ ê³„ì‚°í•´ì„œ ë„£ì–´ì•¼í•¨.
-    Dim fullIndex               As Integer      ' fullArrë°°ì—´ì„ ìˆœì°¨ì ìœ¼ë¡œ ì°¾ì•„ê°ˆ ë³€ìˆ˜
-
-    fullIndex                   = 1         
-
-    for i = 1 to 3 ' ë¬¸ì œê°¯ìˆ˜ ë§Œí¼ ì‹œíŠ¸ë¥¼ ë§Œë“¤ê³  ì‹œíŠ¸ì— ê¸°ë¡í•œë‹¤.
-        ' ì‹œíŠ¸ ìƒì„±í›„ ì‹œíŠ¸ë‚´ í—¤ë” ë§Œë“¤ê¸°
-        for j = 1 to 3
-            problemSheetName = MakeNewSheet(i,j) '001_Opt, 001_ML, 001_Pess, ìƒì„±í•œ ì‹œíŠ¸ì´ë¦„ì„ ë¦¬í„´í•œë‹¤.
-
-
+        ' ½ÃÆ® »ı¼ºÈÄ ½ÃÆ®³» Çì´õ ¸¸µé±â
+        For j = 1 To 3
+            problemSheetName = MakeNewSheet(i, j) '001_Opt, 001_ML, 001_Pess, »ı¼ºÇÑ ½ÃÆ®ÀÌ¸§À» ¸®ÅÏÇÑ´Ù.
         Next
         
 
-        ' = MakeActivity() ' ê¸°ê°„, í™œë™ìˆ˜ ì „ë‹¬ë°›ì•„ì„œ í™œë™ì„ ì™„ì„±í•œë‹¤.
-        'delete Array 'MakeActivity() ì—ì„œ ë°›ë“  ë°°ì—´ì„ ì‚­ì œí•œë‹¤. 
+        ' = MakeActivity() ' ±â°£, È°µ¿¼ö Àü´Ş¹Ş¾Æ¼­ È°µ¿À» ¿Ï¼ºÇÑ´Ù.
+        'delete Array 'MakeActivity() ¿¡¼­ ¹Şµç ¹è¿­À» »èÁ¦ÇÑ´Ù.
 
     Next
 
@@ -98,31 +89,31 @@ End Sub
  
 Function MakeNewSheet(i As Integer, j As Integer)
     
-    Dim strSheetName As String  ' ìƒì„±í•  ì‹œíŠ¸ì˜ ì´ë¦„ì„ ë‹´ì„ ë¬¸ìì—´
-    Dim strOption  
+    Dim strSheetName As String  ' »ı¼ºÇÒ ½ÃÆ®ÀÇ ÀÌ¸§À» ´ãÀ» ¹®ÀÚ¿­
+    Dim strOption
 
-    strOption       = Array("Opt","ML","Press")    
+    strOption = Array("Opt", "ML", "Press")
 
-    strSheetName    = Format(i,"#000")
-    strSheetName    = strSheetName & "_" & strOption(j)
+    strSheetName = Format(i, "#000")
+    strSheetName = strSheetName & "_" & strOption(j)
     
-    Delete_Exist_Sheet(strSheetName)    ' ì‹œíŠ¸ê°€ ì´ë¯¸ ì¡´ì¬í•˜ë©´ ì§€ìš´ë‹¤.
+    Delete_Exist_Sheet (strSheetName)   ' ½ÃÆ®°¡ ÀÌ¹Ì Á¸ÀçÇÏ¸é Áö¿î´Ù.
 
-    Sheets.Add(After:=Sheets(Sheets.Count)).Name = strSheetName 'ìƒˆë¡œìš´ ì‹œíŠ¸ ìƒì„±
+    Sheets.Add(After:=Sheets(Sheets.Count)).Name = strSheetName '»õ·Î¿î ½ÃÆ® »ı¼º
     
-    ' ê²€ì¦ì˜ í¸ë¦¬ì„±ì„ ìœ„í•´ì„œ ì¼ë‹¨ ì—¬ê¸°ì„œ íƒ€ì´í‹€ì„ ì‚½ì…í•œë‹¤.
+    '' °ËÁõÀÇ Æí¸®¼ºÀ» À§ÇØ¼­ ÀÏ´Ü ¿©±â¼­ Å¸ÀÌÆ²À» »ğÀÔÇÑ´Ù.
     Dim strTile
-    strTile = Array("ë¹ˆë„","ì‹œë‚˜ë¦¬ì˜¤","ì›”","í”„ë¡œì íŠ¸","ê¸°ê°„","í™œë™ìˆ˜", _ 
-                    "í™œë™","í™œë™ì‹œì‘","í™œë™ë","r1","r2","r3")
+    strTile = Array("ºóµµ", "½Ã³ª¸®¿À", "¿ù", "ÇÁ·ÎÁ§Æ®", "±â°£", "È°µ¿¼ö", _
+                    "È°µ¿", "È°µ¿½ÃÀÛ", "È°µ¿³¡", "r1", "r2", "r3")
 
-    Dim sheetActtmp As Worksheet 
-    set sheetActtmp = Worksheets(strSheetName)
+    Dim sheetActtmp As Worksheet
+    Set sheetActtmp = Worksheets(strSheetName)
 
     Dim arrSize As Integer
-    arrSize = UBound(strTile) - Lbound(strTile) + 1
+    arrSize = UBound(strTile) - LBound(strTile) + 1
 
     With sheetActtmp
-        .Range(.Cells(1,1),.Cells(1,arrSize)).Value  = strTile
+        .Range(.Cells(1, 1), .Cells(1, arrSize)).Value = strTile
     End With
 
     MakeNewSheet = strSheetName
@@ -136,10 +127,10 @@ Function Delete_Exist_Sheet(WorkSheet_Name As String)
 
     For Each Work_sheet In ThisWorkbook.Worksheets
 
-        If Work_sheet.Name = WorkSheet_Name Then        
-            Application.DisplayAlerts   = False
+        If Work_sheet.Name = WorkSheet_Name Then
+            Application.DisplayAlerts = False
             Worksheets(WorkSheet_Name).Delete
-            Application.DisplayAlerts   = True
+            Application.DisplayAlerts = True
         End If
 
     Next
@@ -149,36 +140,36 @@ End Function
 
 
 
-' ì‹œì‘ì›”ê³¼ ì¢…ë£Œì›”, í™œë™ì˜ ìˆ˜ê°€ ì£¼ì–´ì§€ë©´
-' í™œë™ë³„ ì‹œì‘ ë r1, r2, r3 ë¥¼ ìƒì„±í•˜ëŠ” í•¨ìˆ˜
-Function MakeActivity(ByRef fullArr As Variant, fullIndex As Integer) 
+' ½ÃÀÛ¿ù°ú Á¾·á¿ù, È°µ¿ÀÇ ¼ö°¡ ÁÖ¾îÁö¸é
+' È°µ¿º° ½ÃÀÛ ³¡ r1, r2, r3 ¸¦ »ı¼ºÇÏ´Â ÇÔ¼ö
+Function MakeActivity(ByRef fullArr As Variant, fullIndex As Integer)
 
-    Dim i           As Integer  
+    Dim i           As Integer
     Dim j           As Integer
     
-    Dim prjTime     As Integer ' í”„ë¡œì íŠ¸ ê¸°ê°„
-    Dim actCnt      As Integer ' í™œë™ìˆ˜
-    Dim month       As Integer ' í”„ë¡œì íŠ¸ ì‹œì‘ ë‹¬
+    Dim prjTime     As Integer ' ÇÁ·ÎÁ§Æ® ±â°£
+    Dim actCnt      As Integer ' È°µ¿¼ö
+    Dim month       As Integer ' ÇÁ·ÎÁ§Æ® ½ÃÀÛ ´Ş
     
     Dim actSTime    As Integer
     Dim actETime    As Integer
     
     prjTime = fullArr(fullIndex, 5)
-    actCnt  = fullArr(fullIndex, 6)
-    month   = fullArr(fullIndex, 3)
+    actCnt = fullArr(fullIndex, 6)
+    month = fullArr(fullIndex, 3)
     
-    If actCnt = 1 Then ' í™œë™ì´ 1 ì´ë©´ ê¸°ê°„ì€ ì „ì²´ê¸°ê°„ ìœ¼ë¡œ ì •í•´ì§
+    If actCnt = 1 Then ' È°µ¿ÀÌ 1 ÀÌ¸é ±â°£Àº ÀüÃ¼±â°£ À¸·Î Á¤ÇØÁü
         actSTime = month
-        actETime = month + prjTime - 1    
+        actETime = month + prjTime - 1
 
-    ElseIf actCnt = 2 Then ' í™œë™ì´ 2ê°œì´ë©´ ì‹œì‘ê³¼ ëìœ¼ë¡œ ì ë‹¹íˆ ë‚˜ëˆ”
-        If sheetPrj = 1 Then ' 1ê°œì›” ì§œë¦¬ì´ë©´
+    ElseIf actCnt = 2 Then ' È°µ¿ÀÌ 2°³ÀÌ¸é ½ÃÀÛ°ú ³¡À¸·Î Àû´çÈ÷ ³ª´®
+        If sheetPrj = 1 Then ' 1°³¿ù Â¥¸®ÀÌ¸é
             actSTime = month
-            actETime = month + prjTime - 1    
+            actETime = month + prjTime - 1
 
 
-    Select Case l
-    Case 
+    Select Case L
+    Case
     Case
     Case
     Case Else
@@ -187,17 +178,21 @@ Function MakeActivity(ByRef fullArr As Variant, fullIndex As Integer)
     MakeActivity = 0
 End Function
 
+
+
+
+
 Private Sub old_CommandButton1_Click()
 
     Dim strTile
-    strTile = Array("ë¹ˆë„","ì‹œë‚˜ë¦¬ì˜¤","ì›”","í”„ë¡œì íŠ¸","ê¸°ê°„","í™œë™ìˆ˜", _ 
-                    "í™œë™","í™œë™ì‹œì‘","í™œë™ë","r1","r2","r3")
+    strTile = Array("ºóµµ", "½Ã³ª¸®¿À", "¿ù", "ÇÁ·ÎÁ§Æ®", "±â°£", "È°µ¿¼ö", _
+                    "È°µ¿", "È°µ¿½ÃÀÛ", "È°µ¿³¡", "r1", "r2", "r3")
 
-    Dim sheetActtmp As Worksheet 
-    set sheetActtmp = Worksheets("act_temp")
+    Dim sheetActtmp As Worksheet
+    Set sheetActtmp = Worksheets("act_temp")
 
     With sheetActtmp
-        .Range(.Cells(1,1),.Cells(1,12)).Value  = strTile
+        .Range(.Cells(1, 1), .Cells(1, 12)).Value = strTile
     End With
 
     Dim freq        As Integer
@@ -205,7 +200,7 @@ Private Sub old_CommandButton1_Click()
     Dim month       As Integer
     Dim project     As Integer
     Dim prjTime     As Integer
-    Dim actCnt      As Integer    
+    Dim actCnt      As Integer
     Dim actNum      As Integer
     Dim actSTime    As Integer
     Dim actETime    As Integer
@@ -213,100 +208,100 @@ Private Sub old_CommandButton1_Click()
     Dim r2          As Integer
     Dim r3          As Integer
 
-    freq            = 1
-    scenario        = 2
-    month           = 3
-    project         = 4
-    prjTime         = 5
-    actCnt          = 6
-    actNum        = 7
-    actSTime        = 8
-    actETime        = 9
-    r1              = 10
-    r2              = 11
-    r3              = 12
+    freq = 1
+    scenario = 2
+    month = 3
+    project = 4
+    prjTime = 5
+    actCnt = 6
+    actNum = 7
+    actSTime = 8
+    actETime = 9
+    r1 = 10
+    r2 = 11
+    r3 = 12
 
     Dim h As Integer
     Dim i As Integer
     Dim j As Integer
     Dim k As Integer
 
-    ' ì°¸ê³  : 36ê°œì›” * 5(ìµœëŒ€í”„ë¡œì íŠ¸) * 8(ìµœëŒ€í™œë™) = 1440 ê°œì˜ í™œë™
-    ' 1. ë‹¨ê¸°í”„ë¡œì íŠ¸ - ì „ì²´ í”„ë¡œì íŠ¸ì˜ 60%ë¡œ êµ¬ì„±, ìµœì†Œ 1ê°œì›” ~ ìµœëŒ€ 6ê°œì›” ì´ë‚´
-    ' í”„ë¡œì íŠ¸ ë³„ í™œë™ìˆ˜ë¥¼ êµ¬í•œë‹¤.
+    ' Âü°í : 36°³¿ù * 5(ÃÖ´ëÇÁ·ÎÁ§Æ®) * 8(ÃÖ´ëÈ°µ¿) = 1440 °³ÀÇ È°µ¿
+    ' 1. ´Ü±âÇÁ·ÎÁ§Æ® - ÀüÃ¼ ÇÁ·ÎÁ§Æ®ÀÇ 60%·Î ±¸¼º, ÃÖ¼Ò 1°³¿ù ~ ÃÖ´ë 6°³¿ù ÀÌ³»
+    ' ÇÁ·ÎÁ§Æ® º° È°µ¿¼ö¸¦ ±¸ÇÑ´Ù.
 
-    ' í™œë™ì˜ ìµœëŒ€ìˆ˜ëŠ” 4ê°œë¡œ í•œë‹¤.
+    ' È°µ¿ÀÇ ÃÖ´ë¼ö´Â 4°³·Î ÇÑ´Ù.
 
-    ' í™œë™ìˆ˜ê°€ 1ì´ë©´ ì ì€ ê¸°ê°„ìœ¼ë¡œ ì„¤ì • (2ê°œì›” ì´ë‚´)
+    ' È°µ¿¼ö°¡ 1ÀÌ¸é ÀûÀº ±â°£À¸·Î ¼³Á¤ (2°³¿ù ÀÌ³»)
 
-    ' í™œë™ìˆ˜ê°€ 2ì´ë©´ í™•ìœ¨ì ìœ¼ë¡œ ê²¹ì¹˜ê²Œ í•œë‹¤. (4ê°œì›” ì´ë‚´)
-    ' ë‘ í™œë™ì˜ ê¸°ê°„ì˜ í•©ì€ ìµœì†Œí•œ ì „ì²´ ê¸°ê°„ë³´ë‹¤ ì»¤ì•¼í•œë‹¤.
+    ' È°µ¿¼ö°¡ 2ÀÌ¸é È®À²ÀûÀ¸·Î °ãÄ¡°Ô ÇÑ´Ù. (4°³¿ù ÀÌ³»)
+    ' µÎ È°µ¿ÀÇ ±â°£ÀÇ ÇÕÀº ÃÖ¼ÒÇÑ ÀüÃ¼ ±â°£º¸´Ù Ä¿¾ßÇÑ´Ù.
 
-    ' í™œë™ìˆ˜ê°€ 3 ì´ë©´ (4 ~ 6ê°œì›”)
-    ' 1) 1ë²ˆ í™œë™ì€ ì‹œì‘ìœ¼ë¡œ ë§ˆì§€ë§‰ í™œë™ì€ ëìœ¼ë¡œ ì„¤ì •í•œë‹¤
-    ' 2) 1ë²ˆê³¼ 2ë²ˆ í™œë™ê¸°ê°„ì˜ í•©ì€ ì „ì²´ ê¸°ê°„ì˜ 60%ì„ ë„˜ì§€ ì•ŠëŠ”ë‹¤. 
-    ' 3) ì¤‘ê°„ì˜ í™œë™ì€ í™•ìœ¨ì ìœ¼ë¡œ 1ë²ˆì´ë‚˜ 2ë²ˆê³¼ ê²¹ì¹˜ëŠ” ê¸°ê°„ì„ ê°–ëŠ”ë‹¤.
-    ' 
-    ' í™œë™ìˆ˜ê°€ 4ì´ë©´ (4 ~ 6ê°œì›”)
-    ' 1) 1ë²ˆ í™œë™ì€ ì‹œì‘ìœ¼ë¡œ ë§ˆì§€ë§‰ í™œë™ì€ ëìœ¼ë¡œ ì„¤ì •í•œë‹¤
-    ' 2) 1ë²ˆê³¼ 2ë²ˆ í™œë™ê¸°ê°„ì˜ í•©ì€ ì „ì²´ ê¸°ê°„ì˜ 40%ì„ ë„˜ì§€ ì•ŠëŠ”ë‹¤. 
-    ' 3) ì¤‘ê°„ì˜ í™œë™ì€ í™•ìœ¨ì ìœ¼ë¡œ 1ë²ˆì´ë‚˜ 2ë²ˆê³¼ ê²¹ì¹˜ëŠ” ê¸°ê°„ì„ ê°–ëŠ”ë‹¤.
-    ' 4) ì¤‘ê°„ì˜ í™œë™ê°„ì—ë„ í™•ìœ¨ì ìœ¼ë¡œ ê²¹ì¹˜ëŠ” ê¸°ê°„ì„ ê°–ëŠ”ë‹¤.
+    ' È°µ¿¼ö°¡ 3 ÀÌ¸é (4 ~ 6°³¿ù)
+    ' 1) 1¹ø È°µ¿Àº ½ÃÀÛÀ¸·Î ¸¶Áö¸· È°µ¿Àº ³¡À¸·Î ¼³Á¤ÇÑ´Ù
+    ' 2) 1¹ø°ú 2¹ø È°µ¿±â°£ÀÇ ÇÕÀº ÀüÃ¼ ±â°£ÀÇ 60%À» ³ÑÁö ¾Ê´Â´Ù.
+    ' 3) Áß°£ÀÇ È°µ¿Àº È®À²ÀûÀ¸·Î 1¹øÀÌ³ª 2¹ø°ú °ãÄ¡´Â ±â°£À» °®´Â´Ù.
+    '
+    ' È°µ¿¼ö°¡ 4ÀÌ¸é (4 ~ 6°³¿ù)
+    ' 1) 1¹ø È°µ¿Àº ½ÃÀÛÀ¸·Î ¸¶Áö¸· È°µ¿Àº ³¡À¸·Î ¼³Á¤ÇÑ´Ù
+    ' 2) 1¹ø°ú 2¹ø È°µ¿±â°£ÀÇ ÇÕÀº ÀüÃ¼ ±â°£ÀÇ 40%À» ³ÑÁö ¾Ê´Â´Ù.
+    ' 3) Áß°£ÀÇ È°µ¿Àº È®À²ÀûÀ¸·Î 1¹øÀÌ³ª 2¹ø°ú °ãÄ¡´Â ±â°£À» °®´Â´Ù.
+    ' 4) Áß°£ÀÇ È°µ¿°£¿¡µµ È®À²ÀûÀ¸·Î °ãÄ¡´Â ±â°£À» °®´Â´Ù.
 
-    ' í™œë™ë³„ duration ì„ êµ¬í•œë‹¤.
+    ' È°µ¿º° duration À» ±¸ÇÑ´Ù.
 
-    ' Opt 1ì„ ê°€ì§€ê³  í…ŒìŠ¤í•´ ë³´ì
+    ' Opt 1À» °¡Áö°í Å×½ºÇØ º¸ÀÚ
     Dim Arr()                   As Variant
-    Arr = Range(Cells(5,2),Cells(40,2))         ' Opt, ML, Pess ì— ë”°ë¼ ì„ íƒ ì˜ì—­ì´ ë³€í•˜ê²Œ ìˆ˜ì •í•´ì•¼í•¨.
+    Arr = Range(Cells(5, 2), Cells(40, 2))      ' Opt, ML, Pess ¿¡ µû¶ó ¼±ÅÃ ¿µ¿ªÀÌ º¯ÇÏ°Ô ¼öÁ¤ÇØ¾ßÇÔ.
 
-    Dim fullArr(1 to 1440,1 to 12) As Variant   ' 1440 ëŒ€ì‹  ë²”ìœ„ ê³„ì‚°í•´ì„œ ë„£ì–´ì•¼í•¨.
-    Dim fullIndex               As Integer      ' fullArrë°°ì—´ì„ ìˆœì°¨ì ìœ¼ë¡œ ì°¾ì•„ê°ˆ ë³€ìˆ˜
-    fullIndex                   = 1             ' 
+    Dim fullArr(1 To 1440, 1 To 12) As Variant  ' 1440 ´ë½Å ¹üÀ§ °è»êÇØ¼­ ³Ö¾î¾ßÇÔ.
+    Dim fullIndex               As Integer      ' fullArr¹è¿­À» ¼øÂ÷ÀûÀ¸·Î Ã£¾Æ°¥ º¯¼ö
+    fullIndex = 1                               '
 
-    h = 1                       ' frequency ë²ˆí˜¸ Opt=1, ML=2, Pess=3
-    i = 1                       ' ì‹œë‚˜ë¦¬ì˜¤ë²ˆí˜¸ 1 to ProblemCnt
+    h = 1                       ' frequency ¹øÈ£ Opt=1, ML=2, Pess=3
+    i = 1                       ' ½Ã³ª¸®¿À¹øÈ£ 1 to ProblemCnt
 
     Dim prjTotalCont As Integer
-    prjTotalCont = 0    ' í”„ë¡œì íŠ¸ ë²ˆí˜¸ 
+    prjTotalCont = 0    ' ÇÁ·ÎÁ§Æ® ¹øÈ£
         
-    For j = 1 To 36             ' íƒìƒ‰í•  ì´ ê°œì›”ìˆ˜, êµ¬í•´ì˜¤ê²Œ ë³€ê²½í•´ì•¼í•¨. 
+    For j = 1 To 36             ' Å½»öÇÒ ÃÑ °³¿ù¼ö, ±¸ÇØ¿À°Ô º¯°æÇØ¾ßÇÔ.
         Dim kk                  As Integer
         Dim kkk                 As Integer
         Dim Cnt                 As Integer
 
-        kk = Arr(j,1)
+        kk = Arr(j, 1)
         
-        For k=1 To kk           ' í”„ë¡œì íŠ¸ ë£¨í”„
-            prjTotalCont = prjTotalCont +1
-            If Rnd < 0.2 Then           ' ì¥ê¸°í”„ë¡œì íŠ¸
-                Cnt             = 6     ' ì„ì‹œë¡œ ì¥ê¸° í”„ë¡œì íŠ¸ëŠ” í™œë™ìˆ˜ 6ê°œë¡œ ê³ ì •    
-                kkk             = 10    ' ì„ì‹œë¡œ ì¥ê¸°í”„ë¡œì íŠ¸ ê¸°ê°„ì€ 10ê°œì›”ë¡œ ê³ ì •
+        For k = 1 To kk         ' ÇÁ·ÎÁ§Æ® ·çÇÁ
+            prjTotalCont = prjTotalCont + 1
+            If Rnd < 0.2 Then           ' Àå±âÇÁ·ÎÁ§Æ®
+                Cnt = 6                 ' ÀÓ½Ã·Î Àå±â ÇÁ·ÎÁ§Æ®´Â È°µ¿¼ö 6°³·Î °íÁ¤
+                kkk = 10                ' ÀÓ½Ã·Î Àå±âÇÁ·ÎÁ§Æ® ±â°£Àº 10°³¿ù·Î °íÁ¤
 
-            Else 'ë‹¨ê¸° í”„ë¡œì íŠ¸
-                kkk             = (Rnd * 100) ' ë‹¨ê¸° í”„ë¡œì íŠ¸ í™œë™ì˜ ìˆ˜ëŠ” 1~4ê°œ ì‚¬ì´ë¡œ
-                kkk             = (kkk mod 4) + 1
-                Cnt             = kkk
+            Else '´Ü±â ÇÁ·ÎÁ§Æ®
+                kkk = (Rnd * 100)             ' ´Ü±â ÇÁ·ÎÁ§Æ® È°µ¿ÀÇ ¼ö´Â 1~4°³ »çÀÌ·Î
+                kkk = (kkk Mod 4) + 1
+                Cnt = kkk
 
-                kkk             = (Rnd * 100)   ' ë‹¨ê¸° í”„ë¡œì íŠ¸ ì´ ê¸°ê°„ì€ 1~6ê°œì›” ì‚¬ì´ë¡œ
-                kkk             = (kkk mod 6) + 1
+                kkk = (Rnd * 100)               ' ´Ü±â ÇÁ·ÎÁ§Æ® ÃÑ ±â°£Àº 1~6°³¿ù »çÀÌ·Î
+                kkk = (kkk Mod 6) + 1
                 
             End If
 
-            Dim l As Integer                
-            For l = 1 To Cnt ' í™œë™ì˜ ê°¯ìˆ˜ë§Œí¼ ë£¨í”„ë¥¼ ëˆë‹¤.
+            Dim L As Integer
+            For L = 1 To Cnt ' È°µ¿ÀÇ °¹¼ö¸¸Å­ ·çÇÁ¸¦ µ·´Ù.
 
-                fullArr(fullIndex, freq)        = h
-                fullArr(fullIndex, scenario)    = i ' ê³µë€ìœ¼ë¡œ ë‚¨ê²¨ ë†“ìœ¼ë ¤ë©´ "" ì…ë ¥
-                fullArr(fullIndex, month)       = j
-                fullArr(fullIndex, project)     = prjTotalCont
-                fullArr(fullIndex, prjTime)     = kkk
-                fullArr(fullIndex, actCnt)      = Cnt
-                fullArr(fullIndex, actNum)      = l ' ì—¬ê¸°ê¹Œì§€ ì‘ì„±í•¨.
-                fullArr(fullIndex, actSTime)    = l '
-                fullArr(fullIndex, actETime)    = l '
-                fullArr(fullIndex, r1)          = "" '
-                fullArr(fullIndex, r2)          = l '
-                fullArr(fullIndex, r3)          = l '
+                fullArr(fullIndex, freq) = h
+                fullArr(fullIndex, scenario) = i    ' °ø¶õÀ¸·Î ³²°Ü ³õÀ¸·Á¸é "" ÀÔ·Â
+                fullArr(fullIndex, month) = j
+                fullArr(fullIndex, project) = prjTotalCont
+                fullArr(fullIndex, prjTime) = kkk
+                fullArr(fullIndex, actCnt) = Cnt
+                fullArr(fullIndex, actNum) = L      ' ¿©±â±îÁö ÀÛ¼ºÇÔ.
+                fullArr(fullIndex, actSTime) = L    '
+                fullArr(fullIndex, actETime) = L    '
+                fullArr(fullIndex, r1) = ""          '
+                fullArr(fullIndex, r2) = L          '
+                fullArr(fullIndex, r3) = L          '
 
                 fullIndex = fullIndex + 1
             Next
@@ -315,103 +310,12 @@ Private Sub old_CommandButton1_Click()
     Next
 
     With sheetActtmp
-        .Range(.Cells(2,1),.Cells(1441,12)).Value = fullArr
+        .Range(.Cells(2, 1), .Cells(1441, 12)).Value = fullArr
     End With
 
 End Sub
 
-Private Sub old2_CommandButton1_Click()
 
-    Dim strTile
-    strTile = Array("ë¹ˆë„","ì‹œë‚˜ë¦¬ì˜¤","ì›”","í”„ë¡œì íŠ¸","ê¸°ê°„","í™œë™ìˆ˜", _ 
-                    "í™œë™","í™œë™ì‹œì‘","í™œë™ë","r1","r2","r3")
 
-    Dim sheetActtmp As Worksheet 
-    set sheetActtmp = Worksheets("act_temp")
 
-    With sheetActtmp
-        .Range(.Cells(1,1),.Cells(1,12)).Value  = strTile
-    End With
-
-    Dim freq        As Integer
-    Dim scenario    As Integer
-    Dim month       As Integer
-    Dim project     As Integer
-    Dim prjTime     As Integer
-    Dim actCnt      As Integer    
-    Dim actNum      As Integer
-    Dim actSTime    As Integer
-    Dim actETime    As Integer
-    Dim r1          As Integer
-    Dim r2          As Integer
-    Dim r3          As Integer
-
-    freq            = 1
-    scenario        = 2
-    month           = 3
-    project         = 4
-    prjTime         = 5
-    actCnt          = 6
-    actNum          = 7
-    actSTime        = 8
-    actETime        = 9
-    r1              = 10
-    r2              = 11
-    r3              = 12
-
-    Dim h As Integer
-    Dim i As Integer
-    Dim j As Integer
-    Dim k As Integer
-
-    ' ì°¸ê³  : 36ê°œì›” * 5(ìµœëŒ€í”„ë¡œì íŠ¸) * 8(ìµœëŒ€í™œë™) = 1440 ê°œì˜ í™œë™
-    ' 1. ë‹¨ê¸°í”„ë¡œì íŠ¸ - ì „ì²´ í”„ë¡œì íŠ¸ì˜ 60%ë¡œ êµ¬ì„±, ìµœì†Œ 1ê°œì›” ~ ìµœëŒ€ 6ê°œì›” ì´ë‚´
-    ' í”„ë¡œì íŠ¸ ë³„ í™œë™ìˆ˜ë¥¼ êµ¬í•œë‹¤.
-
-    ' í™œë™ì˜ ìµœëŒ€ìˆ˜ëŠ” 4ê°œë¡œ í•œë‹¤.
-
-    ' í™œë™ìˆ˜ê°€ 1ì´ë©´ ì ì€ ê¸°ê°„ìœ¼ë¡œ ì„¤ì • (2ê°œì›” ì´ë‚´)
-
-    ' í™œë™ìˆ˜ê°€ 2ì´ë©´ í™•ìœ¨ì ìœ¼ë¡œ ê²¹ì¹˜ê²Œ í•œë‹¤. (4ê°œì›” ì´ë‚´)
-    ' ë‘ í™œë™ì˜ ê¸°ê°„ì˜ í•©ì€ ìµœì†Œí•œ ì „ì²´ ê¸°ê°„ë³´ë‹¤ ì»¤ì•¼í•œë‹¤.
-
-    ' í™œë™ìˆ˜ê°€ 3 ì´ë©´ (4 ~ 6ê°œì›”)
-    ' 1) 1ë²ˆ í™œë™ì€ ì‹œì‘ìœ¼ë¡œ ë§ˆì§€ë§‰ í™œë™ì€ ëìœ¼ë¡œ ì„¤ì •í•œë‹¤
-    ' 2) 1ë²ˆê³¼ 2ë²ˆ í™œë™ê¸°ê°„ì˜ í•©ì€ ì „ì²´ ê¸°ê°„ì˜ 60%ì„ ë„˜ì§€ ì•ŠëŠ”ë‹¤. 
-    ' 3) ì¤‘ê°„ì˜ í™œë™ì€ í™•ìœ¨ì ìœ¼ë¡œ 1ë²ˆì´ë‚˜ 2ë²ˆê³¼ ê²¹ì¹˜ëŠ” ê¸°ê°„ì„ ê°–ëŠ”ë‹¤.
-    ' 
-    ' í™œë™ìˆ˜ê°€ 4ì´ë©´ (4 ~ 6ê°œì›”)
-    ' 1) 1ë²ˆ í™œë™ì€ ì‹œì‘ìœ¼ë¡œ ë§ˆì§€ë§‰ í™œë™ì€ ëìœ¼ë¡œ ì„¤ì •í•œë‹¤
-    ' 2) 1ë²ˆê³¼ 2ë²ˆ í™œë™ê¸°ê°„ì˜ í•©ì€ ì „ì²´ ê¸°ê°„ì˜ 40%ì„ ë„˜ì§€ ì•ŠëŠ”ë‹¤. 
-    ' 3) ì¤‘ê°„ì˜ í™œë™ì€ í™•ìœ¨ì ìœ¼ë¡œ 1ë²ˆì´ë‚˜ 2ë²ˆê³¼ ê²¹ì¹˜ëŠ” ê¸°ê°„ì„ ê°–ëŠ”ë‹¤.
-    ' 4) ì¤‘ê°„ì˜ í™œë™ê°„ì—ë„ í™•ìœ¨ì ìœ¼ë¡œ ê²¹ì¹˜ëŠ” ê¸°ê°„ì„ ê°–ëŠ”ë‹¤.
-
-    ' í™œë™ë³„ duration ì„ êµ¬í•œë‹¤.
-
-    Dim problemSheetName As String
-    Dim Arr()            As Variant
-
-    Arr = Range(Cells(5,2),Cells(40,2))         ' Opt, ML, Pess ì— ë”°ë¼ ì„ íƒ ì˜ì—­ì´ ë³€í•˜ê²Œ ìˆ˜ì •í•´ì•¼í•¨.
-
-    Dim fullArr(1 to 1440,1 to 12) As Variant   ' 1440 ëŒ€ì‹  ë²”ìœ„ ê³„ì‚°í•´ì„œ ë„£ì–´ì•¼í•¨.
-    Dim fullIndex               As Integer      ' fullArrë°°ì—´ì„ ìˆœì°¨ì ìœ¼ë¡œ ì°¾ì•„ê°ˆ ë³€ìˆ˜
-
-    fullIndex                   = 1         
-
-    for i = 1 to 3 ' ë¬¸ì œê°¯ìˆ˜ ë§Œí¼ ì‹œíŠ¸ë¥¼ ë§Œë“¤ê³  ì‹œíŠ¸ì— ê¸°ë¡í•œë‹¤.
-        ' ì‹œíŠ¸ ìƒì„±í›„ ì‹œíŠ¸ë‚´ í—¤ë” ë§Œë“¤ê¸°
-        for j = 1 to 3
-            problemSheetName = MakeNewSheet(i,j) '001_Opt, 001_ML, 001_Pess, ìƒì„±í•œ ì‹œíŠ¸ì´ë¦„ì„ ë¦¬í„´í•œë‹¤.
-            
-
-        Next
-        
-
-        ' = MakeActivity() ' ê¸°ê°„, í™œë™ìˆ˜ ì „ë‹¬ë°›ì•„ì„œ í™œë™ì„ ì™„ì„±í•œë‹¤.
-        'delete Array 'MakeActivity() ì—ì„œ ë°›ë“  ë°°ì—´ì„ ì‚­ì œí•œë‹¤. 
-
-    Next
-
-End Sub
- 
 
