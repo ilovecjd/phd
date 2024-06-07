@@ -9,30 +9,27 @@ Private Sub CommandButton1_Click()
     'CirculateMonth ' 월별 진행 프로젝트 현황 표를 생성한다.
     'Call BuildPrj(10)
 
-	Dim ws 				As Worksheet
-	Dim month 			As Integer
+	Dim ws 				As Worksheet	'프로젝트 정보를 적을 시트
+	Dim weeks 			As Integer		' 시뮬레이션 기간
 	Dim i 				As Integer
 	Dim j 				As Integer
 	Dim endPrjNum		As Integer
 	Dim preTotal		As Integer
 	Dim prjNUm			As Integer
 	Dim arrAllPrj() 	As clsProject  
-	Dim totalPrjNum	As Integer	
+	Dim totalPrjNum		As Integer	
+	Dim SimulTerm 		As Integer 		' 시뮬레이션 전체 기간
+	
+	Set ws 				= ThisWorkbook.Sheets("GenDBoard")
+	SimulTerm 			= ws.Cells(7, 3).Value
 
-    Set ws 				= ThisWorkbook.Sheets("dashboard") ' 적절한 시트 이름으로 변경 
-	totalPrjNum   		= ws.Cells(3, 37).Value
+    Set ws 				= ThisWorkbook.Sheets("dashboard") ' 
+	totalPrjNum   		= ws.Cells(3, SimulTerm+1).Value
 	Redim arrAllPrj(1 to totalPrjNum)
-
     
 
-	' For i = 1 to totalPrjNum
-	' 	Set arrAllPrj(i) = New clsProject
-	' 	Call arrAllPrj(i).Init(0, mon, "project2",2)    'Init(initType As Integer, initNum As Integer, sheetName As String)
-	' 	Call arrAllPrj(i).PrintInfo()
-	' Next
-
-	For i =2 to 37 
-		month 		= ws.Cells(2,i ) ' 월
+	For i =2 to (SimulTerm+1) 
+		weeks 		= ws.Cells(2,i ) ' 주
 		endPrjNum 	= ws.Cells(3,i ) ' 이번달까지 누계는 마지막 번호
 
 		If i=2 Then ' 처음이면 초기값을
@@ -53,20 +50,13 @@ Private Sub CommandButton1_Click()
 
 		For j = prjNUm to endPrjNum ' 
 			Set arrAllPrj(j) = New clsProject
-			Call arrAllPrj(j).Init(0, j, "project2",month)    'Init(initType As Integer, initNum As Integer, sheetName As String)
+			Call arrAllPrj(j).Init(0, j, "project",weeks)    'Init(initType As Integer, initNum As Integer, sheetName As String)
 			Call arrAllPrj(j).PrintInfo()
 		Next
 
-
 		Continue: 
 
-
 	Next
-
-    'Dim cProject As New clsProject 
-    ' Call cProject.Init(0, 1, "project2")    'Init(initType As Integer, initNum As Integer, sheetName As String)
-	' Call cProject.PrintInfo()	
-
   
 End Sub
 
@@ -115,10 +105,10 @@ Function BuildPrj(prjCnt As Integer)
         N_CF
         
     Next
-
-
     
 End Function
+
+
 Sub GenerateCombinations()
     Dim ws As Worksheet
     Set ws = ThisWorkbook.Sheets("dashboard") ' 적절한 시트 이름으로 변경
