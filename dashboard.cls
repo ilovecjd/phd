@@ -1,4 +1,5 @@
 Option Explicit
+Option Base 1
 
 '' 시트내의 값을 이용해서 프로젝트를 가상을 진행 시켜본다.
 Private Sub CommandButton1_Click()
@@ -9,55 +10,29 @@ Private Sub CommandButton1_Click()
     'CirculateMonth ' 월별 진행 프로젝트 현황 표를 생성한다.
     'Call BuildPrj(10)
 
-	Dim ws 				As Worksheet	'프로젝트 정보를 적을 시트
-	Dim weeks 			As Integer		' 시뮬레이션 기간
-	Dim i 				As Integer
-	Dim j 				As Integer
-	Dim endPrjNum		As Integer
-	Dim preTotal		As Integer
-	Dim prjNUm			As Integer
-	Dim arrAllPrj() 	As clsProject  
-	Dim totalPrjNum		As Integer	
-	Dim SimulTerm 		As Integer 		' 시뮬레이션 전체 기간
-	
-	Set ws 				= ThisWorkbook.Sheets("GenDBoard")
-	SimulTerm 			= ws.Cells(7, 3).Value
+	Dim i 				As Integer	
+	Dim Company As clsCompany
 
-    Set ws 				= ThisWorkbook.Sheets("dashboard") ' 
-	totalPrjNum   		= ws.Cells(3, SimulTerm+1).Value
-	Redim arrAllPrj(1 to totalPrjNum)
-    
+	Call Prologue()
 
-	For i =2 to (SimulTerm+1) 
-		weeks 		= ws.Cells(2,i ) ' 주
-		endPrjNum 	= ws.Cells(3,i ) ' 이번달까지 누계는 마지막 번호
+	Dim ws 		As Worksheet
+	Dim rng 	As Range	
+	Set ws		= ThisWorkbook.Sheets(DBOARD_SHEET_NAME)
+	Set rng		= ws.Range(ws.Cells(3,2),ws.Cells(4,SimulTerm+1))
 
-		If i=2 Then ' 처음이면 초기값을
-			preTotal 	= 0' 이전누계	
-		Else
-			preTotal 	= ws.Cells(3,i-1 )' 이전누계				
-		End If
 
-		prjNUm = preTotal + 1 ' 시작프로젝트 번호
+	Set Company = New clsCompany
+	' song ==> 회사 ID를 넣어 주자. (같은 조건에서 여러 회사를 운영)
+	Company.SimulationDuration = SimulTerm
+	Call Company.SetOrderTable(rng)	' 
+	Call Company.Init()	' 
 
-		If prjNUm = 0 Then
-			GoTo Continue 
-		End If
-
-		If prjNUm > endPrjNum Then
-			GoTo Continue 
-		End If	
-
-		For j = prjNUm to endPrjNum ' 
-			Set arrAllPrj(j) = New clsProject
-			Call arrAllPrj(j).Init(0, j, "project",weeks)    'Init(initType As Integer, initNum As Integer, sheetName As String)
-			Call arrAllPrj(j).PrintInfo()
-		Next
-
-		Continue: 
-
+	For i = 1 to 10 'song ==> SimulTerm 으로 수정
+		Call Company.Decision(i)	' i번째 기간에 결정해야 할 일들
 	Next
-  
+
+	Call Epilogue()
+	
 End Sub
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -128,9 +103,9 @@ Sub GenerateCombinations()
     
     ' 데이터는 2번째 열부터 읽어옴
     For i = 1 To lastCol - 1 ' 헤더 부분은 빼고 읽어 온다
-        periods(i)      = ws.Cells(2, i+1).Value
-        accumulate(i)   = ws.Cells(3, i+1).Value
-        counts(i)       = ws.Cells(4, i+1).Value
+        periods(i)      = ws.Cells(2, i+1).value
+        accumulate(i)   = ws.Cells(3, i+1).value
+        counts(i)       = ws.Cells(4, i+1).value
     Next i
     
     ' 모든 조합 생성  
