@@ -37,13 +37,14 @@ Function MakeDashboard()
         Dim projectsWeek  As Integer
     
         ' 이번주 발생하는 프로젝트 갯수
-        prjCnt 	= PoissonRandom(avgProjects)
-        sum 	= sum + prjCnt
-
+        prjCnt 	= PoissonRandom(avgProjects) 
         posY 	= 2
         dashArr(posY, i + 1) = i:       posY = posY + 1
         dashArr(posY, i + 1) = sum:     posY = posY + 1
         dashArr(posY, i + 1) = prjCnt:  posY = posY + 1
+
+		' 이번주 까지 발생한 프로젝트 갯수. 다음주에 기록된다. ==> 이전주까지 발생한 프로젝트 갯수
+		sum 	= sum + prjCnt
         
     Next
 	'song ==> 발주 프로젝트 전체 크기를 기록해 두자.
