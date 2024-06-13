@@ -15,6 +15,8 @@ Public Const ACTIVITY_SHEET_NAME 	= "activity_struct"
 ' 주요 테이블의 제목
 Public Const ORDER_PROJECT_TITLE	= "발주 프로젝트 현황"
 
+
+Public Const P_TYPE_INTERNAL = 1
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' 프로그램 동작을 위한 기본 정보들. 
 ' prologue함수가 parameter 시트에서 읽어 온다.
@@ -84,7 +86,7 @@ End Type
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' Global Variable
-Global gProject As clsProject
+
 
 
 
