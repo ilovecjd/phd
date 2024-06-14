@@ -15,14 +15,18 @@ Private Sub CommandButton1_Click()
 
 	Call Prologue()
 
+	
+	Dim	envVar		As EnvExcel
+	envVar 			= GetExcelEnv
+
 	Dim ws 		As Worksheet
 	Dim rng 	As Range	
 	Set ws		= ThisWorkbook.Sheets(DBOARD_SHEET_NAME)
-	Set rng		= ws.Range(ws.Cells(3,2),ws.Cells(4,SimulTerm+1))
+	Set rng		= ws.Range(ws.Cells(3,2),ws.Cells(4,envVar.SimulationDuration+1))
 
 
 	Set Company = New clsCompany	
-	Company.SimulationDuration = SimulTerm	' song ==> 회사 ID를 넣어 주자. (같은 조건에서 여러 회사를 운영)
+	Company.SimulationDuration = envVar.SimulationDuration	' song ==> 회사 ID를 넣어 주자. (같은 조건에서 여러 회사를 운영)
 	Call Company.SetOrderTable(rng)			' 발주 현황을 설정한다. 
 	Call Company.Init()						' 초기화 한다. 프로젝트들을 생성한다. song ==> 추후 로드로 변경해야 할 수도 있다.
 

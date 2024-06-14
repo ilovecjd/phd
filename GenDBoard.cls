@@ -57,8 +57,8 @@ Function PrintProject()
 	' Set myArray = GetProjectInfoTable
 	' PrintArrayWithLine(DBOARD_SHEET_NAME, 2, 2,myArray)	
 
-	ErrorHandler:
-		MsgBox "An error occurred: " & Err.Description, vbExclamation
+ErrorHandler:
+	MsgBox "An error occurred: " & Err.Description, vbExclamation
 	
 End Function
 

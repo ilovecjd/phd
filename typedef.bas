@@ -97,6 +97,10 @@ End Type
 
 
 ' Public functions
+Public Property Get GetExcelEnv() As EnvExcel
+	GetExcelEnv = EnvVar
+End Property
+
 Public Property Get ExcelInitialized() As Boolean
 	ExcelInitialized = gExcelInitialized
 End Property
