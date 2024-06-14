@@ -504,7 +504,7 @@ Public Function PrintHeader()
     Dim MyArray() 	As String, strHeader As String
     Dim sheetPrj 	As Worksheet
 
-    Set sheetPrj 	= Worksheets(SheetName)
+    Set sheetPrj 	= ThisWorkbook.Sheets(SheetName)
     With sheetPrj
         strHeader	= "타입 순번 발주일 시작가능 기간 시작 수익 경험 성공% CF1% CF2% CF3%"
         MyArray 	= Split(strHeader)

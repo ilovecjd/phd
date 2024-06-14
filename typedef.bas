@@ -15,10 +15,8 @@ Public Const ACTIVITY_SHEET_NAME 	= "activity_struct"
 ' 주요 테이블의 제목
 Public Const ORDER_PROJECT_TITLE	= "발주 프로젝트 현황"
 
-
 Public Const P_TYPE_EXTERNAL = 0 ' 외부(발주)프로젝트
 Public Const P_TYPE_INTERNAL = 1 ' 내부 프로젝트
-
 
 Private gExcelInitialized 	As Boolean	' 전역 변수들이 초기화 되었는지 확인하는 플래그. 초기화 되면 1
 Private gTableInitialized 	As Boolean	' 전역 테이블이 초기화 되었는지 확인하는 플래그. 초기화 되면 1
@@ -26,21 +24,12 @@ Private gTotalProjectNum	As Integer	' 발생한 프로젝트의 총 갯수 (누�
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 ' ' 프로그램 동작을 위한 기본 정보들. 
-Private EnvVar	As EnvExcel
-' ' prologue함수가 parameter 시트에서 읽어 온다.
-' Private gSimulationDuration	As Integer  ' 시뮬레이션을 동작 시킬 기간(주)
-' Private gAvgProjects			As Double  ' 주당 발생하는 평균 발주 프로젝트 수
-
-' Private gHr_Init_H   			As Integer  ' 최초에 보유한 고급 인력
-' Private gHr_Init_M   			As Integer  ' 최초에 보유한 중급 인력
-' Private gHr_Init_L   			As Integer  ' 최초에 보유한 초급 인력
-' Private gHr_LeadTime 			As Integer  ' 인력 충원에 걸리는 시간
-
-' Private gCash_Init   			As Integer  ' 최초 보유 현금
-' Private gProblem     			As Integer  ' 프로젝트 생성 개수 (= 문제의 개수) / MakePrj 함수의 인자
-
+Private EnvVar				As EnvExcel
 Private OrderTable()		As Variant 		' 발주된 프로젝트들을 관리하는 테이블
 Private ProjectInfoTable()	As clsProject	' 모든 프로제트들을 담고 있는 테이블
+
+
+Public PrintDurationTable()	As Variant 		' 사용하기 편하게 모든 월을 넣어 놓는다. 
 
 
 ''''''''''''''''''''
@@ -93,16 +82,6 @@ Type Activity
     LowSkill        As Integer  ' 필요한 초급 인력 수
 End Type
 
-
-'' song ==> 사용 하지 않음. 클래스 멤버로 사용중
-' 프로젝트 생성의 정보를 담는 구조체
-Type EnvProject
-	Probabilty As Double
-	MinDuration As Integer
-	MaxDuration As Integer
-	NumPartten	As Integer
-End Type
-
 '' song ==> 사용 하지 않음
 ' 활동생성의 정보를 담는 구조체
 Type EnvActivity
@@ -118,22 +97,32 @@ End Type
 
 
 ' Public functions
-Public Property Get ExcelInitialized() as Boolean
+Public Property Get ExcelInitialized() As Boolean
 	ExcelInitialized = gExcelInitialized
 End Property
 
-Public Property Let ExcelInitialized(value  as Boolean) 
+Public Property Let ExcelInitialized(value  As Boolean) 
 	gExcelInitialized = value
 End Property
 
 
-Public Property Get TableInitialized() as Boolean
+Public Property Get TableInitialized() As Boolean
 	TableInitialized = gTableInitialized
 End Property
 
-Public Property Let TableInitialized(value as Boolean) 
+Public Property Let TableInitialized(value As Boolean) 
 	gTableInitialized = value
 End Property
+
+
+Public Property Get GetOrderTable() As Variant
+	GetOrderTable = OrderTable
+End Property
+
+Public Property Get GetProjectInfoTable() As Variant
+	GetProjectInfoTable = ProjectInfoTable
+End Property
+
 
 
 ' utility functions
@@ -157,7 +146,7 @@ Sub Prologue()
 		EnvVar.Hr_LeadTime 			= GetVariableValue(rng, "Hr_LeadTime")
 		EnvVar.Cash_Init 			= GetVariableValue(rng, "Cash_Init")
 		EnvVar.Problem 				= GetVariableValue(rng, "ProblemCnt")
-
+		
 		gExcelInitialized = 1		' 전역 변수들이 초기화 되었는지 확인하는 플래그. 초기화 되면 1
 
 	End If
@@ -178,6 +167,14 @@ Sub Prologue()
 			MsgBox "CreateProjects Error", vbExclamation 			
 			Exit Sub
 		End If
+
+		Dim i As Integer
+
+		ReDim PrintDurationTable(1, EnvVar.SimulationDuration)
+
+		For i = 1 to (EnvVar.SimulationDuration )
+			PrintDurationTable(1, i) = i
+		Next
 
 		gTableInitialized = 1
 
