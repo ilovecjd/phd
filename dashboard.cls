@@ -1,7 +1,7 @@
 Option Explicit
 Option Base 1
 
-'' 시트내의 값을 이용해서 프로젝트를 가상을 진행 시켜본다.
+'' 시트내의 값을 이용해서 프로젝트를 가상으로 진행 시켜본다.
 Private Sub CommandButton1_Click()
 
     ' 전역 변수 설정
@@ -21,20 +21,42 @@ Private Sub CommandButton1_Click()
 	Set rng		= ws.Range(ws.Cells(3,2),ws.Cells(4,SimulTerm+1))
 
 
-	Set Company = New clsCompany
-	' song ==> 회사 ID를 넣어 주자. (같은 조건에서 여러 회사를 운영)
-	Company.SimulationDuration = SimulTerm
-	Call Company.SetOrderTable(rng)	' 
-	Call Company.Init()	' 
+	Set Company = New clsCompany	
+	Company.SimulationDuration = SimulTerm	' song ==> 회사 ID를 넣어 주자. (같은 조건에서 여러 회사를 운영)
+	Call Company.SetOrderTable(rng)			' 발주 현황을 설정한다. 
+	Call Company.Init()						' 초기화 한다. 프로젝트들을 생성한다. song ==> 추후 로드로 변경해야 할 수도 있다.
 
 	For i = 1 to 10 'song ==> SimulTerm 으로 수정
 		Call Company.Decision(i)	' i번째 기간에 결정해야 할 일들
+		Dim Arr() As Variant
+		Arr = Company.PropertyDoingTable
+		Call PrintPDecision(Arr)
+		
 	Next
 
 	Call Epilogue()
 	
 End Sub
 
+Function PrintPDecision(Arr() As Variant)
+
+	Dim ws As Worksheet
+	Set ws = ThisWorkbook.Sheets(DBOARD_SHEET_NAME)
+
+
+	With ws
+		Dim endRow As Long ' 마지막행
+		Dim endCol As Long ' 마지막열
+
+		'''''''''''''''''''''''''''''''''''''
+		' 배열의 크기를 구해서 배열을 넣고 테두리를 그린다.
+		endRow = UBound(Arr, 1) - LBound(Arr, 1) + 13
+		endCol = UBound(Arr, 2) - LBound(Arr, 2) + 2
+		.Range(.Cells(13, 2), .Cells(endRow, endCol)).value = Arr
+
+	End With
+
+End Function
 
 Sub GenerateCombinations()
     Dim ws As Worksheet

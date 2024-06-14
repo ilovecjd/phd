@@ -11,22 +11,25 @@ Attribute VB_Exposed = False
 Option Explicit
 Option Base 1
 
-Dim QOrder			As clsQueue		' 발주된 프로젝트들
-Dim QDoing 			As clsQueue		' 진행중인 프로젝트들
-Dim QDone			As clsQueue		' 완료된 프로젝트들
-Dim QDeffer			As clsQueue		' 보류된 프로젝트들
+Dim OrderTable()		As Variant 		' 발주된 프로젝트들을 관리하는 테이블
+Dim DoneTable()			As Integer		' 완료된 프로젝트들을 관리하는 테이블
+Dim DefferTable()		As Integer		' 보류된 프로젝트들을 관리하는 테이블
+Dim ProjectInfoTable()	As clsProject	' 모든 프로제트들을 담고 있는 테이블
 
-Dim OrderTable()	As Variant 		' 발주된 프로젝트들을 관리하는 테이블
-Dim DoingTable()	As Integer		' 진행중인 프로젝트들을 관리하는 테이블
-Dim DoneTable()		As Integer		' 완료된 프로젝트들을 관리하는 테이블
-Dim DefferTable()	As Integer		' 보류된 프로젝트들을 관리하는 테이블
-Dim TableSizeY		As Integer		' 테이블들의 크기 ( 들어갈 프로젝트 갯수)
-
-
+Private DoingTable()		As Variant		' 진행중인 프로젝트들을 관리하는 테이블
 Private m_SimulationDuration As Integer ' 시뮬레이션을 수행하는 기간
-Property Let SimulationDuration(value As Long)  
+Private Const m_MaxIDsPerWeek = 200	' 한주에 최대 실행 가능한 프로젝트의 수. song ==> 동적으로 수정하자.
+' Dim TableSizeY		As Integer		' 테이블들의 크기 ( 들어갈 프로젝트 갯수)
+
+
+Public Property Get PropertyDoingTable()  As Variant
+    PropertyDoingTable = DoingTable
+End Property
+
+Public Property Let SimulationDuration(value As Integer)  
 	m_SimulationDuration = value
 End Property
+
 
 ' OrderTable의 Range 전달받아서 복사한다.
 Public Function SetOrderTable(rng As Range)
@@ -56,151 +59,156 @@ Public Function Decision(week As Integer)
 	'  이번주에 발주된 프로젝트중 시작할 것이 있으면 이번주 진행 프로젝트로 기록
 	Call SelectNewProject(week)
 
-	' 
-	
+	' 	
 	
 End Function
 
 Private Function SelectNewProject(week As Integer)
 
-	Dim project As clsProject
-	Dim cnt As Integer
-	Dim i  As Integer
-	Dim id As Integer
+	Dim project			As clsProject
+	Dim cnt 			As Integer	
+	Dim id 				As Integer
+
+	Dim startProjectNum As Integer
+	Dim endProjectNum 	As Integer
 
 
 	If week = 0 Then ' song ==> 현재까지 코드에서는 0 번째 주 라는 개념은 없다.
 		Exit Function
 	End If
 	
-	cnt = DoingTable(1,week) 
-	If cnt =0 Then	' song ==> 지난주에 진행중이던 프로젝트가 없다.
+	cnt = OrderTable(2,week) 
+	If cnt =0 Then	' 이번주에 발주된 프로젝트가 없다.
 		Exit Function
 	End If
 
-	For i = 1 to cnt
-		id = DoingTable(i +1, week-1)
-		project = QDoing.SearchByID(id)
+	startProjectNum	= OrderTable(1,week) + 1   ' 이번기간에 처음 프로젝트
+	endProjectNum 	= OrderTable(1,week) +  cnt' 이번기간의 마지막 프로젝트
+
+	' song ==> 일단 모든 프로젝트를 다 하는것으로 하자.
+	For id = startProjectNum to endProjectNum
+
+		Set project = ProjectInfoTable(id)
 		
 		If project.ProjectType = P_TYPE_INTERNAL	Then ' 내부프로젝트이면
 
-		Else
-			If week = (project.StartDate + project.ProjectDuration) Then ' 지난번에 끝났으면
-				Call QDoing.RemoveByID(project.ProjectNum )' q에서 꺼내고 
-				Call RemoveFromTable(DoingTable,week, project.ProjectNum)' doing table에서 삭제
-				Call AddToTable(DoingTable,week, project.ProjectNum)' done table에 업데이트			
-			End If
+		' song ==> 이번주에 시작할지 말지 결정하는 루틴이 필요함. 우선은 모두 진행으로
+		Else	
+			project.StartDate	 = week
+			Call AddToTable(DoingTable,week, project.ProjectNum)' Doing table에 추가			
 		End If
 	Next
 
 End Function
 
-
+' 지난주에 완료된 프로젝트들이 있는지 확인한다.
 Private Function CheckLastWeek(week As Integer)
 
 	Dim project As clsProject
-	Dim cnt As Integer
-	Dim i  As Integer
-	Dim id As Integer
+	Dim cnt 	As Integer
+	Dim i  		As Integer
+	Dim id 		As Integer
 
 
 	If week = 1 Then ' song ==> 현재까지 코드에서는 처음 시작에는 지난주가 없다
 		Exit Function
 	End If
 	
-	cnt = DoingTable(1,week-1) 
+	cnt = DoingTable(1,week-1) ' 지난주에 진행 중이던 프로젝트의 갯수
 	If cnt =0 Then	' song ==> 지난주에 진행중이던 프로젝트가 없다.
 		Exit Function
 	End If
 
+	' 지난 기간의 정보를 이번기간에 복사하고 복사된 정보에서 지난 기간에 완료된 프로젝트는 삭제한다.
+	Call CopyLastToCurrent(DoingTable, week, cnt)
+
 	For i = 1 to cnt
-		id = DoingTable(i +1, week-1)
-		project = QDoing.SearchByID(id)
+		id = DoingTable(i + 1, week)
+		Set project = ProjectInfoTable(id)
 		
 		If project.ProjectType = P_TYPE_INTERNAL	Then ' 내부프로젝트이면
-
+			Debug.Print "내부 프로젝트"
 		Else
-			If week = (project.StartDate + project.ProjectDuration) Then ' 지난번에 끝났으면
-				Call QDoing.RemoveByID(project.ProjectNum )' q에서 꺼내고 
-				Call RemoveFromTable(DoingTable,week, project.ProjectNum)' doing table에서 삭제
-				Call AddToTable(DoingTable,week, project.ProjectNum)' done table에 업데이트			
+			If week = (project.StartDate + project.ProjectDuration-1) Then ' 지난번에 끝났으면				
+				Call RemoveFromTable(DoingTable,week, project.ProjectNum)' doing table에서 삭제				
 			End If
 		End If
 	Next
 
 End Function
 
+' 복사할 테이블, 현재기간, 이전기간의 프로젝트 갯수
+Private Function CopyLastToCurrent(prjTable As Variant, ByVal currentWeek As Integer, ByVal lastProjectCnt As Integer)
+
+	' song ==> 예외 처리 필요
+	Dim i As Integer
+
+	For i = 1 To (lastProjectCnt + 1)
+		prjTable(i, currentWeek) = prjTable(i, currentWeek-1)
+	Next
+	
+End Function
 
 ' All Q init and QToDo setting, 
 Public Function Init()	
 
-	Set QOrder	= New clsQueue
-	Set QDoing	= New clsQueue
-	Set QDone	= New clsQueue
+	' song ==> 큐는 필요 없다.
+	' Set QOrder	= New clsQueue
+	' Set QDoing	= New clsQueue
+	' Set QDone	= New clsQueue
 
-	TableSizeY = 6 'song ==> 추후 프로젝스 갯수에 따라 동적으로 변경 필요
-	ReDim DoingTable(TableSizeY,	m_SimulationDuration)
-	ReDim DoneTable(TableSizeY, 	m_SimulationDuration)
-	ReDim DefferTable(TableSizeY, 	m_SimulationDuration)
-
-
-	Dim tempPrj As clsProject
 	    
 	' 전역 변수 설정
     ' 기간별 선택 가능프로젝트 확인	
-	Dim weeks 			As Integer		' 시뮬레이션 기간
 	Dim i 				As Integer
-	Dim j 				As Integer
+	Dim id 				As Integer
+	Dim startPrjNum		As Integer
 	Dim endPrjNum		As Integer
-	Dim preTotal		As Integer
-	Dim prjNUm			As Integer	
+	Dim preTotal		As Integer	
 	Dim totalPrjNum		As Integer	
+	Dim tempPrj 		As clsProject	
+	
+	totalPrjNum   		= OrderTable(1,m_SimulationDuration) + OrderTable(2,m_SimulationDuration)
 
-	totalPrjNum   		= OrderTable(1,m_SimulationDuration)
+	ReDim DoingTable(m_MaxIDsPerWeek+1,	m_SimulationDuration)
+	ReDim DoneTable(m_MaxIDsPerWeek+1, 	m_SimulationDuration)
+	ReDim DefferTable(m_MaxIDsPerWeek+1, 	m_SimulationDuration)
+	ReDim ProjectInfoTable(totalPrjNum)
 
+	' 프로젝트들을 생성한다. 
 	For i = 1 to m_SimulationDuration 
 		
-		endPrjNum 	= OrderTable(1,i)' ws.Cells(3,i ) ' 이번달까지 누계는 마지막 번호
-
-		If i = 1 Then ' 처음이면 초기값을
-			preTotal 	= 0' 이전누계	
-		Else
-			preTotal 	= OrderTable(1,i-1)' ws.Cells(3,i-1 )' 이전누계				
-		End If
-
-		prjNUm = preTotal + 1 ' 시작프로젝트 번호
-
-		If prjNUm = 0 Then
+		preTotal 	= OrderTable(1,i)			' 이전 기간 까지 발생한 프로젝트 누적 갯수
+		startPrjNum	= preTotal + 1 				' 이번 기간 시작프로젝트 번호
+		endPrjNum 	= OrderTable(2,i) + preTotal' 이번 기간 마지막 프로젝트 번호
+		
+		If startPrjNum = 0 Then
 			GoTo Continue 
 		End If
 
-		If prjNUm > endPrjNum Then
+		If startPrjNum > endPrjNum Then
 			GoTo Continue 
 		End If	
 
-		For j = prjNUm to endPrjNum ' 
+		' 이번 주에 발생한 프로젝트들을 생성한다.
+		For id = startPrjNum to endPrjNum ' 
 			Set tempPrj = New clsProject		
 			'Init(initType As Integer, initNum As Integer, shtName As String, ODate As Integer)	
-			Call tempPrj.Init(0, j, PROJECT_SHEET_NAME,i) 
+			Call tempPrj.Init(P_TYPE_EXTERNAL, id, PROJECT_SHEET_NAME,i) 
+			Set ProjectInfoTable(id) = tempPrj
 			Call tempPrj.PrintInfo()
-			Call QOrder.Enqueue(tempPrj)
 		Next
 
-		j = QOrder.GetCount
-
-		Debug.Print "Q Count" & j
-		Debug.Print 
-		
 		Continue: 
 
 	Next
   
-
 End Function
 
 
 '' 프로젝트 관리 테이블에 프로젝트를 넣는 범용적인 함수 (Doing, Done, Deffer )
 Sub AddToTable(prjTable As Variant, week As Integer, projectID As Integer)
+
     Dim sumRow As Integer
     Dim lastEmptyRow As Integer
 
@@ -211,11 +219,11 @@ Sub AddToTable(prjTable As Variant, week As Integer, projectID As Integer)
     End If
 
     ' 합계 행 설정
-    sumRow = 2
+    sumRow = 1
 
     ' 비어있는 마지막 행 찾기 (합계를 통해 결정)
-    lastEmptyRow = prjTable(sumRow, week) + 3
-    If lastEmptyRow > 2 + m_MaxIDsPerWeek Then
+    lastEmptyRow = prjTable(sumRow, week) + 2
+    If lastEmptyRow > (sumRow + m_MaxIDsPerWeek) Then
         MsgBox "No empty slot available in week " & week, vbExclamation
         Exit Sub
     End If
@@ -225,13 +233,14 @@ Sub AddToTable(prjTable As Variant, week As Integer, projectID As Integer)
 
     ' 합계 및 프로젝트 수 증가
     prjTable(sumRow, week) = prjTable(sumRow, week) + 1
-    prjTable(3, week) = prjTable(3, week) + 1
+ 
 End Sub
 
-Sub RemoveFromTable(prjTable As Variant, week As Integer, projectID As Integer)
-    Dim i As Integer
-    Dim sumRow As Integer
-    Dim found As Boolean
+Sub RemoveFromTable(prjTable As Variant, ByVal week As Integer, ByVal projectID As Integer)
+
+    Dim i 		As Integer
+    Dim sumRow 	As Integer
+    Dim found 	As Boolean
     Dim lastRow As Integer
 
     ' 배열의 크기 확인
@@ -241,12 +250,12 @@ Sub RemoveFromTable(prjTable As Variant, week As Integer, projectID As Integer)
     End If
 
     ' 합계 행 설정
-    sumRow = 2
+    sumRow = 1
     found = False
-    lastRow = 2 + m_MaxIDsPerWeek
+    lastRow = sumRow + m_MaxIDsPerWeek
 
     ' 해당 주에서 projectID 찾기
-    For i = 3 To lastRow
+    For i = (sumRow + 1) To lastRow
         If prjTable(i, week) = projectID Then
             found = True
             Exit For
@@ -262,7 +271,7 @@ Sub RemoveFromTable(prjTable As Variant, week As Integer, projectID As Integer)
 
         ' 합계 및 프로젝트 수 감소
         prjTable(sumRow, week) = prjTable(sumRow, week) - 1
-        prjTable(3, week) = prjTable(3, week) - 1
+        
     Else
         MsgBox "Project ID " & projectID & " not found in week " & week, vbExclamation
     End If

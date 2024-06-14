@@ -48,19 +48,39 @@ Public Function Dequeue() As clsProject
 End Function
 
 ' 큐에서 특정 객체 검색
+' Public Function SearchByID(id As Integer) As clsProject
+'     Dim i As Integer
+'     Dim index As Integer
+    
+'     For i = 0 To Count - 1
+'         index = ((Head + i - 1) Mod MAX_QUEUE_SIZE) + 1
+'         If Queue(index).ProjectNum = id Then
+'             Set SearchByID = Queue(index)
+'             Exit Function
+'         End If
+'     Next i
+'     Set SearchByID = Nothing
+' End Function
+
+
 Public Function SearchByID(id As Integer) As clsProject
     Dim i As Integer
     Dim index As Integer
     
+    ' 기본값 설정
+    Set SearchByID = Nothing
+
     For i = 0 To Count - 1
         index = ((Head + i - 1) Mod MAX_QUEUE_SIZE) + 1
-        If Queue(index).ProjectID = id Then
-            Set SearchByID = Queue(index)
-            Exit Function
+        If Not Queue(index) Is Nothing Then ' Queue(index)가 Nothing이 아닌지 확인
+            If Queue(index).ProjectNum = id Then
+                Set SearchByID = Queue(index)
+                Exit Function
+            End If
         End If
     Next i
-    Set SearchByID = Nothing
 End Function
+
 
 Public Function RemoveAndReturnByID(id As Integer) As clsProject
     Dim i As Integer
@@ -71,7 +91,7 @@ Public Function RemoveAndReturnByID(id As Integer) As clsProject
     
     For i = 0 To Count - 1
         index = ((Head + i - 1) Mod MAX_QUEUE_SIZE) + 1
-        If Queue(index).ProjectID = id Then
+        If Queue(index).ProjectNum = id Then
             found = True
             Exit For
         End If
@@ -103,7 +123,7 @@ Public Sub RemoveByID(id As Integer)
     
     For i = 0 To Count - 1
         index = ((Head + i - 1) Mod MAX_QUEUE_SIZE) + 1
-        If Queue(index).ProjectID = id Then
+        If Queue(index).ProjectNum = id Then
             found = True
             Exit For
         End If
