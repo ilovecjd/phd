@@ -101,23 +101,27 @@ Public Property Get GetExcelEnv() As EnvExcel
 	GetExcelEnv = EnvVar
 End Property
 
-Public Property Get ExcelInitialized() As Boolean
-	ExcelInitialized = gExcelInitialized
+Public Property Get GetExcelInitialized() As Boolean
+	GetExcelInitialized = gExcelInitialized
 End Property
 
-Public Property Let ExcelInitialized(value  As Boolean) 
+Public Property Let LetExcelInitialized(value  As Boolean) 
 	gExcelInitialized = value
 End Property
 
 
-Public Property Get TableInitialized() As Boolean
-	TableInitialized = gTableInitialized
+Public Property Get GetTableInitialized() As Boolean
+	GetTableInitialized = gTableInitialized
 End Property
 
-Public Property Let TableInitialized(value As Boolean) 
+Public Property Let LetTableInitialized(value As Boolean) 
 	gTableInitialized = value
 End Property
 
+
+Public Property Get GetTotalProjectNum() As Integer
+	GetTotalProjectNum = gTotalProjectNum
+End Property
 
 Public Property Get GetOrderTable() As Variant
 	GetOrderTable = OrderTable

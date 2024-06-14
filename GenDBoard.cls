@@ -1,16 +1,24 @@
 Option Explicit
 Option Base 1
 
+Dim totalProjectNum As Integer
+Dim projectInfoTable()	As clsProject	' 모든 프로제트들을 담고 있는 테이블
+
+
 ' 대시보드를 생성한다. 
 Private Sub GenDBoard_Click()
 
-	ExcelInitialized = 0	' 새로운 프로젝트들을 생성하기 위해 초기화 플래그 변경
-	TableInitialized = 0	' 새로운 프로젝트들을 생성하기 위해 초기화 플래그 변경
+	LetExcelInitialized = 0	' 새로운 프로젝트들을 생성하기 위해 초기화 플래그 변경
+	LetTableInitialized = 0	' 새로운 프로젝트들을 생성하기 위해 초기화 플래그 변경
 
     Call Prologue()          ' 전체 파라메터 로드, 대시보드를 생성, 프로젝트 생성
 	Call PrintDashboard()	' 생성된 대시보드를 시트에 출력한다
-	Call PrintProject()		' 생성된 프로젝트를 시트에 출력한다.
 
+	totalProjectNum = GetTotalProjectNum
+	projectInfoTable = GetProjectInfoTable
+
+	Call PrintProject()		' 생성된 프로젝트를 시트에 출력한다.
+	
 	' Call CreateDashboard()     ' 대시보드를 생성하고 전체 프로젝트의 갯수를 구한다.
 	' Call Epilogue()
 
@@ -44,18 +52,14 @@ Function PrintProject()
 	arrHeader = ConvertTo1xN(arrHeader)
 	Call PrintArrayWithLine(ws, 3, 1,arrHeader)
 
+	Dim temp As clsProject
+	Dim i As Integer
 
-	' Call PrintArrayWithLine(ws, 2, 2,PrintDurationTable)	'기간을 적고
-	
-	' Call PrintArrayWithLine(ws, 3, 2,GetOrderTable)		' 내용을 적는다.
-
-	' Set myArray = GetPrintHeaderTable
-	' PrintArrayWithLine(ws, 1, 1,myArray)	
-
+	For i = 1 To totalProjectNum
+		Set temp = ProjectInfoTable(i)
+		Call temp.PrintInfo()
+	Next
 	Exit Function
-
-	' Set myArray = GetProjectInfoTable
-	' PrintArrayWithLine(DBOARD_SHEET_NAME, 2, 2,myArray)	
 
 ErrorHandler:
 	MsgBox "An error occurred: " & Err.Description, vbExclamation
