@@ -20,7 +20,7 @@ Public Const P_TYPE_INTERNAL = 1 ' 내부 프로젝트
 
 Private gExcelInitialized 	As Boolean	' 전역 변수들이 초기화 되었는지 확인하는 플래그. 초기화 되면 1
 Private gTableInitialized 	As Boolean	' 전역 테이블이 초기화 되었는지 확인하는 플래그. 초기화 되면 1
-Private gTotalProjectNum	As Integer	' 발생한 프로젝트의 총 갯수 (누계)
+Public gTotalProjectNum	As Integer	' 발생한 프로젝트의 총 갯수 (누계)
 
 
 Public gWsGenDBoard			As Worksheet	' 워크시트들을 전역으로 미리 구해 놓는다.
@@ -30,9 +30,9 @@ Public gWsActivity_Struct	As Worksheet
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 ' ' 프로그램 동작을 위한 기본 정보들. 
-Private gExcelEnv			As EnvExcel
-Private gOrderTable()		As Variant 		' 발주된 프로젝트들을 관리하는 테이블
-Private gProjectInfoTable()	As clsProject	' 모든 프로제트들을 담고 있는 테이블
+Public gExcelEnv			As EnvExcel
+Public gOrderTable()		As Variant 		' 발주된 프로젝트들을 관리하는 테이블
+Public gProjectTable()	As clsProject	' 모든 프로제트들을 담고 있는 테이블
 
 
 Public PrintDurationTable()	As Variant 		' 사용하기 편하게 모든 월을 넣어 놓는다. 
@@ -129,8 +129,8 @@ Public Property Get GetOrderTable() As Variant
 	GetOrderTable = gOrderTable
 End Property
 
-Public Property Get GetProjectInfoTable() As Variant
-	GetProjectInfoTable = gProjectInfoTable
+Public Property Get GetProjectTable() As Variant
+	GetProjectTable = gProjectTable
 End Property
 
 
@@ -175,7 +175,7 @@ On Error GoTo ErrorHandler
 		ReDim gOrderTable(2,gExcelEnv.SimulationDuration)
 		Call CreateOrderTable()
 
-		ReDim gProjectInfoTable(2, gTotalProjectNum)
+		ReDim gProjectTable(2, gTotalProjectNum)
 		Call CreateProjects()
 
 		ReDim PrintDurationTable(1, gExcelEnv.SimulationDuration)
@@ -255,7 +255,7 @@ Private Function CreateProjects() As Boolean
 	End If
 
 	'프로젝트들을 생성한다. 
-	ReDim gProjectInfoTable(gTotalProjectNum)
+	ReDim gProjectTable(gTotalProjectNum)
 
 	For week = 1 to gExcelEnv.SimulationDuration
 		
@@ -275,7 +275,7 @@ Private Function CreateProjects() As Boolean
 		For id = startPrjNum to endPrjNum ' 
 			Set tempPrj 	= New clsProject
 			Call tempPrj.Init(P_TYPE_EXTERNAL, id, week) 
-			Set gProjectInfoTable(id) = tempPrj
+			Set gProjectTable(id) = tempPrj
 			'Call tempPrj.PrintInfo()
 		Next
 

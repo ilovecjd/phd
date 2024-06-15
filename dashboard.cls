@@ -11,24 +11,13 @@ Private Sub CommandButton1_Click()
     'Call BuildPrj(10)
 
 	Dim i 				As Integer	
-	Dim Company As clsCompany
+	Dim Company 		As clsCompany
 
 	Call Prologue()
 
-	Dim	envVar		As EnvExcel
-	envVar 			= GetExcelEnv
-
-	Dim rng 	As Range
-	With gWsDashboard
-		Set rng		= .Range(.Cells(3,2),.Cells(4,envVar.SimulationDuration+1))
-	End With
-	
-
-
 	Set Company = New clsCompany	
-	Company.SimulationDuration = envVar.SimulationDuration	' song ==> 회사 ID를 넣어 주자. (같은 조건에서 여러 회사를 운영)
-	Call Company.SetOrderTable(rng)			' 발주 현황을 설정한다. 
-	Call Company.Init()						' 초기화 한다. 프로젝트들을 생성한다. song ==> 추후 로드로 변경해야 할 수도 있다.
+	Company.comID = 1	' song ==> 회사 ID를 넣어 주자. (같은 조건에서 여러 회사를 운영)
+	Call Company.Init()	' 초기화 한다. 현재는 비어 있다.  song ==> 추후 로드로 변경해야 할 수도 있다.
 
 	' For i = 1 to 10 'song ==> SimulTerm 으로 수정
 	' 	Call Company.Decision(i)	' i번째 기간에 결정해야 할 일들

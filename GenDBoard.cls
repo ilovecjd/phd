@@ -1,10 +1,6 @@
 Option Explicit
 Option Base 1
 
-Dim totalProjectNum As Integer
-Dim projectInfoTable()	As clsProject	' 모든 프로제트들을 담고 있는 테이블
-
-
 ' 대시보드를 생성한다. 
 Private Sub GenDBoard_Click()
 
@@ -12,11 +8,7 @@ Private Sub GenDBoard_Click()
 	LetTableInitialized = 0	' 새로운 프로젝트들을 생성하기 위해 초기화 플래그 변경
 
     Call Prologue()          ' 전체 파라메터 로드, 대시보드를 생성, 프로젝트 생성
-	Call PrintDashboard()	' 생성된 대시보드를 시트에 출력한다
-
-	totalProjectNum = GetTotalProjectNum
-	projectInfoTable = GetProjectInfoTable
-
+	Call PrintDashboard()	' 생성된 대시보드를 시트에 출력한다	
 	Call PrintProject()		' 생성된 프로젝트를 시트에 출력한다.
 	
 	' Call CreateDashboard()     ' 대시보드를 생성하고 전체 프로젝트의 갯수를 구한다.
@@ -50,14 +42,14 @@ Function PrintProject()
 	Dim temp As clsProject
 	Dim i As Integer
 
-	For i = 1 To totalProjectNum
-		Set temp = ProjectInfoTable(i)
+	For i = 1 To gTotalProjectNum
+		Set temp = gProjectTable(i)
 		Call temp.PrintInfo()
 	Next
 	Exit Function
 
 ErrorHandler:
-	MsgBox "An error occurred: " & Err.Description, vbExclamation
+	Call HandleError("PrintProject", Err.Description)
 	
 End Function
 
@@ -104,7 +96,7 @@ Function PrintDashboard()	' 생성된 대시보드를 시트에 출력한다
 
 	Call PrintArrayWithLine(gWsDashboard, 2, 1,arrHeader)		' 세로항목을 적고
 	Call PrintArrayWithLine(gWsDashboard, 2, 2,PrintDurationTable)	'기간을 적고	
-	Call PrintArrayWithLine(gWsDashboard, 3, 2,GetOrderTable)		' 내용을 적는다.
+	Call PrintArrayWithLine(gWsDashboard, 3, 2,gOrderTable)		' 내용을 적는다.
 
 	' Set myArray = GetPrintHeaderTable
 	' PrintArrayWithLine(ws, 1, 1,myArray)	
@@ -115,7 +107,7 @@ Function PrintDashboard()	' 생성된 대시보드를 시트에 출력한다
 	' PrintArrayWithLine(DBOARD_SHEET_NAME, 2, 2,myArray)	
 
 	ErrorHandler:
-		MsgBox "An error occurred: " & Err.Description, vbExclamation
+		Call HandleError("PrintDashboard", Err.Description)
 
 End Function
 
@@ -329,5 +321,4 @@ Function CreateDashboard()
     MakeDashboard = sum
 
 End Function
-
 

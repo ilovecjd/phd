@@ -11,44 +11,42 @@ Attribute VB_Exposed = False
 Option Explicit
 Option Base 1
 
-Dim OrderTable()		As Variant 		' 발주된 프로젝트들을 관리하는 테이블
-Dim DoneTable()			As Integer		' 완료된 프로젝트들을 관리하는 테이블
-Dim DefferTable()		As Integer		' 보류된 프로젝트들을 관리하는 테이블
-Dim ProjectInfoTable()	As clsProject	' 모든 프로제트들을 담고 있는 테이블
+Dim comDoingTable()			As Variant		' 진행중인 프로젝트들의 ID를 관리하는 테이블
+Dim comDoneTable()			As Integer		' 완료된 프로젝트들의 ID를 관리하는 테이블
+Dim comDefferTable()		As Integer		' 보류된 프로젝트들의 ID를 관리하는 테이블
 
-Private DoingTable()		As Variant		' 진행중인 프로젝트들을 관리하는 테이블
-Private m_SimulationDuration As Integer ' 시뮬레이션을 수행하는 기간
-Private Const m_MaxIDsPerWeek = 200	' 한주에 최대 실행 가능한 프로젝트의 수. song ==> 동적으로 수정하자.
-' Dim TableSizeY		As Integer		' 테이블들의 크기 ( 들어갈 프로젝트 갯수)
+Dim comDoingTableSize As Integer		' comDoneTable의 현재크기 song ==> 동적으로 수정하자.
+Dim comDoneTableSize As Integer		' comDoneTable의 현재크기 song ==> 동적으로 수정하자.
+Dim comDefferTableSize As Integer		' comDoneTable의 현재크기 song ==> 동적으로 수정하자.
 
+Dim comID As Integer ' 회사 이름
 
 Public Property Get PropertyDoingTable()  As Variant
     PropertyDoingTable = DoingTable
 End Property
 
-Public Property Let SimulationDuration(value As Integer)  
-	m_SimulationDuration = value
-End Property
+' 생성자와 소멸자
+Private Sub Class_Initialize()
 
+	comDoingTableSize	= 10
+	comDoneTableSize	= 10
+	comDefferTableSize	= 10
 
-' OrderTable의 Range 전달받아서 복사한다.
-Public Function SetOrderTable(rng As Range)
+	ReDim comDoingTable(comDoingTableSize)			As Variant		' 진행중인 프로젝트들의 ID를 관리하는 테이블
+	ReDim comDoneTable(comDoneTableSize)			As Integer		' 완료된 프로젝트들의 ID를 관리하는 테이블
+	ReDim comDefferTable(comDefferTableSize)		As Integer		' 보류된 프로젝트들의 ID를 관리하는 테이블
 
-	If m_SimulationDuration = 0 Then
-		MsgBox "m_SimulationDuration Error " , " m_SimulationDuration Error", vbExclamation
-		Exit Function
-	End If
+End Sub
 
-	ReDim OrderTable(2, m_SimulationDuration)
+Private Sub Class_Terminate()
+	' 종료할때 버퍼의 크기를 확인해서 가까운 값으로 초기값을 결정하자.
+	Debug.Print "Class is being terminated" comDoingTableSize, comDoneTableSize,comDefferTableSize
+End Sub
 
-	OrderTable = rng.value
-
-End Function 
 
 
 '' 이번 기간에 결정할 일들. 프로젝트의 신규진행, 멈춤, 인원증감 결정
 Public Function Decision(week As Integer)
-
 
 	' 1. 완료프로젝트 검사 및 진행프로젝트 업데이트
 	' 지난주에 진행중인 프로젝트중 완료된 것이 있는가?
@@ -58,14 +56,13 @@ Public Function Decision(week As Integer)
 	' 2. 신규 프로젝트 선택 및 진행프로젝트 업데이트
 	'  이번주에 발주된 프로젝트중 시작할 것이 있으면 이번주 진행 프로젝트로 기록
 	Call SelectNewProject(week)
-
 	' 	
 	
 End Function
 
 Private Function SelectNewProject(week As Integer)
 
-	Dim project			As clsProject
+	Dim cProject			As clsProject
 	Dim cnt 			As Integer	
 	Dim id 				As Integer
 
@@ -82,20 +79,20 @@ Private Function SelectNewProject(week As Integer)
 		Exit Function
 	End If
 
-	startProjectNum	= OrderTable(1,week) + 1   ' 이번기간에 처음 프로젝트
-	endProjectNum 	= OrderTable(1,week) +  cnt' 이번기간의 마지막 프로젝트
+	startProjectNum	= gOrderTable(1,week) + 1   ' 이번기간에 처음 프로젝트
+	endProjectNum 	= gOrderTable(1,week) +  cnt' 이번기간의 마지막 프로젝트
 
 	' song ==> 일단 모든 프로젝트를 다 하는것으로 하자.
 	For id = startProjectNum to endProjectNum
 
-		Set project = ProjectInfoTable(id)
+		Set cProject = ProjectInfoTable(id)
 		
-		If project.ProjectType = P_TYPE_INTERNAL	Then ' 내부프로젝트이면
+		If cProject.ProjectType = P_TYPE_INTERNAL	Then ' 내부프로젝트이면
 
 		' song ==> 이번주에 시작할지 말지 결정하는 루틴이 필요함. 우선은 모두 진행으로
 		Else	
-			project.StartDate	 = week
-			Call AddToTable(DoingTable,week, project.ProjectNum)' Doing table에 추가			
+			cProject.StartDate	 = week
+			Call AddToTable(DoingTable,week, cProject.ProjectNum)' Doing table에 추가			
 		End If
 	Next
 
@@ -104,7 +101,7 @@ End Function
 ' 지난주에 완료된 프로젝트들이 있는지 확인한다.
 Private Function CheckLastWeek(week As Integer)
 
-	Dim project As clsProject
+	Dim cProject As clsProject
 	Dim cnt 	As Integer
 	Dim i  		As Integer
 	Dim id 		As Integer
@@ -124,7 +121,7 @@ Private Function CheckLastWeek(week As Integer)
 
 	For i = 1 to cnt
 		id = DoingTable(i + 1, week)
-		Set project = ProjectInfoTable(id)
+		Set cProject = ProjectInfoTable(id)
 		
 		If project.ProjectType = P_TYPE_INTERNAL	Then ' 내부프로젝트이면
 			Debug.Print "내부 프로젝트"
@@ -152,57 +149,7 @@ End Function
 ' All Q init and QToDo setting, 
 Public Function Init()	
 
-	' song ==> 큐는 필요 없다.
-	' Set QOrder	= New clsQueue
-	' Set QDoing	= New clsQueue
-	' Set QDone	= New clsQueue
-
-	    
-	' 전역 변수 설정
-    ' 기간별 선택 가능프로젝트 확인	
-	Dim i 				As Integer
-	Dim id 				As Integer
-	Dim startPrjNum		As Integer
-	Dim endPrjNum		As Integer
-	Dim preTotal		As Integer	
-	Dim totalPrjNum		As Integer	
-	Dim tempPrj 		As clsProject	
-	
-	totalPrjNum   		= OrderTable(1,m_SimulationDuration) + OrderTable(2,m_SimulationDuration)
-
-	ReDim DoingTable(m_MaxIDsPerWeek+1,	m_SimulationDuration)
-	ReDim DoneTable(200+1, 	m_SimulationDuration)
-	ReDim DefferTable(m_MaxIDsPerWeek+1, 	m_SimulationDuration)
-	ReDim ProjectInfoTable(totalPrjNum)
-
-	' ' 프로젝트들을 생성한다. 
-	' For i = 1 to m_SimulationDuration 
-		
-	' 	preTotal 	= OrderTable(1,i)			' 이전 기간 까지 발생한 프로젝트 누적 갯수
-	' 	startPrjNum	= preTotal + 1 				' 이번 기간 시작프로젝트 번호
-	' 	endPrjNum 	= OrderTable(2,i) + preTotal' 이번 기간 마지막 프로젝트 번호
-		
-	' 	If startPrjNum = 0 Then
-	' 		GoTo Continue 
-	' 	End If
-
-	' 	If startPrjNum > endPrjNum Then
-	' 		GoTo Continue 
-	' 	End If	
-
-	' 	' 이번 주에 발생한 프로젝트들을 생성한다.
-	' 	For id = startPrjNum to endPrjNum ' 
-	' 		Set tempPrj = New clsProject		
-	' 		'Init(initType As Integer, initNum As Integer, shtName As String, ODate As Integer)	
-	' 		Call tempPrj.Init(P_TYPE_EXTERNAL, id, PROJECT_SHEET_NAME,i) 
-	' 		Set ProjectInfoTable(id) = tempPrj
-	' 		Call tempPrj.PrintInfo()
-	' 	Next
-
-	' 	Continue: 
-
-	' Next
-  
+	  
 End Function
 
 
