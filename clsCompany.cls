@@ -11,19 +11,19 @@ Attribute VB_Exposed = False
 Option Explicit
 Option Base 1
 
-Dim comDoingTable()			As Variant		' 진행중인 프로젝트들의 ID를 관리하는 테이블
-Dim comDoneTable()			As Integer		' 완료된 프로젝트들의 ID를 관리하는 테이블
-Dim comDefferTable()		As Integer		' 보류된 프로젝트들의 ID를 관리하는 테이블
+Private comDoingTable()			As Integer		' 진행중인 프로젝트들의 ID를 관리하는 테이블
+Private comDoneTable()			As Integer		' 완료된 프로젝트들의 ID를 관리하는 테이블
+Private comDefferTable()		As Integer		' 보류된 프로젝트들의 ID를 관리하는 테이블
 
-Dim comDoingTableSize As Integer		' comDoneTable의 현재크기 song ==> 동적으로 수정하자.
-Dim comDoneTableSize As Integer		' comDoneTable의 현재크기 song ==> 동적으로 수정하자.
-Dim comDefferTableSize As Integer		' comDoneTable의 현재크기 song ==> 동적으로 수정하자.
+Public comDoingTableSize As Integer		' comDoneTable의 현재크기 song ==> 동적으로 수정하자.
+Public comDoneTableSize As Integer		' comDoneTable의 현재크기 song ==> 동적으로 수정하자.
+Public comDefferTableSize As Integer		' comDoneTable의 현재크기 song ==> 동적으로 수정하자.
 
-Dim comID As Integer ' 회사 이름
+Public comID As Integer ' 회사 이름
 
-Public Property Get PropertyDoingTable()  As Variant
-    PropertyDoingTable = DoingTable
-End Property
+' Public Property Get PropertyDoingTable()  As Variant
+'     PropertyDoingTable = comDoingTable
+' End Property
 
 ' 생성자와 소멸자
 Private Sub Class_Initialize()
@@ -32,9 +32,9 @@ Private Sub Class_Initialize()
 	comDoneTableSize	= 10
 	comDefferTableSize	= 10
 
-	ReDim comDoingTable(comDoingTableSize)			As Variant		' 진행중인 프로젝트들의 ID를 관리하는 테이블
-	ReDim comDoneTable(comDoneTableSize)			As Integer		' 완료된 프로젝트들의 ID를 관리하는 테이블
-	ReDim comDefferTable(comDefferTableSize)		As Integer		' 보류된 프로젝트들의 ID를 관리하는 테이블
+	ReDim comDoingTable(1 To comDoingTableSize)		' 진행중인 프로젝트들의 ID를 관리하는 테이블
+	ReDim comDoneTable(1 To comDoneTableSize)		' 완료된 프로젝트들의 ID를 관리하는 테이블
+	ReDim comDefferTable(1 To comDefferTableSize)		' 보류된 프로젝트들의 ID를 관리하는 테이블
 
 End Sub
 
