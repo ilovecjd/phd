@@ -15,14 +15,14 @@ Private Sub CommandButton1_Click()
 
 	Call Prologue()
 
-	
 	Dim	envVar		As EnvExcel
 	envVar 			= GetExcelEnv
 
-	Dim ws 		As Worksheet
-	Dim rng 	As Range	
-	Set ws		= ThisWorkbook.Sheets(DBOARD_SHEET_NAME)
-	Set rng		= ws.Range(ws.Cells(3,2),ws.Cells(4,envVar.SimulationDuration+1))
+	Dim rng 	As Range
+	With gWsDashboard
+		Set rng		= .Range(.Cells(3,2),.Cells(4,envVar.SimulationDuration+1))
+	End With
+	
 
 
 	Set Company = New clsCompany	
@@ -30,13 +30,13 @@ Private Sub CommandButton1_Click()
 	Call Company.SetOrderTable(rng)			' 발주 현황을 설정한다. 
 	Call Company.Init()						' 초기화 한다. 프로젝트들을 생성한다. song ==> 추후 로드로 변경해야 할 수도 있다.
 
-	For i = 1 to 10 'song ==> SimulTerm 으로 수정
-		Call Company.Decision(i)	' i번째 기간에 결정해야 할 일들
-		Dim Arr() As Variant
-		Arr = Company.PropertyDoingTable
-		Call PrintPDecision(Arr)
+	' For i = 1 to 10 'song ==> SimulTerm 으로 수정
+	' 	Call Company.Decision(i)	' i번째 기간에 결정해야 할 일들
+	' 	Dim Arr() As Variant
+	' 	Arr = Company.PropertyDoingTable
+	' 	Call PrintPDecision(Arr)
 		
-	Next
+	' Next
 
 	Call Epilogue()
 	
@@ -44,11 +44,7 @@ End Sub
 
 Function PrintPDecision(Arr() As Variant)
 
-	Dim ws As Worksheet
-	Set ws = ThisWorkbook.Sheets(DBOARD_SHEET_NAME)
-
-
-	With ws
+	With gWsDashboard
 		Dim endRow As Long ' 마지막행
 		Dim endCol As Long ' 마지막열
 
@@ -63,11 +59,10 @@ Function PrintPDecision(Arr() As Variant)
 End Function
 
 Sub GenerateCombinations()
-    Dim ws As Worksheet
-    Set ws = ThisWorkbook.Sheets("dashboard") ' 적절한 시트 이름으로 변경
+   
     
     Dim lastCol         As Integer
-    lastCol = ws.Cells(2, ws.Columns.Count).End(xlToLeft).Column ' 마지막 열 찾기
+    lastCol = ws.Cells(2, gWsDashboard.Columns.Count).End(xlToLeft).Column ' 마지막 열 찾기
     
     Dim periods()       As Integer
     Dim accumulate()    As Integer ' 누적된 발주프로젝의 갯수를 넣어 둔다.
@@ -81,9 +76,9 @@ Sub GenerateCombinations()
     
     ' 데이터는 2번째 열부터 읽어옴
     For i = 1 To lastCol - 1 ' 헤더 부분은 빼고 읽어 온다
-        periods(i)      = ws.Cells(2, i+1).value
-        accumulate(i)   = ws.Cells(3, i+1).value
-        counts(i)       = ws.Cells(4, i+1).value
+        periods(i)      = gWsDashboard.Cells(2, i+1).value
+        accumulate(i)   = gWsDashboard.Cells(3, i+1).value
+        counts(i)       = gWsDashboard.Cells(4, i+1).value
     Next i
     
     ' 모든 조합 생성  

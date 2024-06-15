@@ -171,7 +171,7 @@ Public Function Init()
 	totalPrjNum   		= OrderTable(1,m_SimulationDuration) + OrderTable(2,m_SimulationDuration)
 
 	ReDim DoingTable(m_MaxIDsPerWeek+1,	m_SimulationDuration)
-	ReDim DoneTable(m_MaxIDsPerWeek+1, 	m_SimulationDuration)
+	ReDim DoneTable(200+1, 	m_SimulationDuration)
 	ReDim DefferTable(m_MaxIDsPerWeek+1, 	m_SimulationDuration)
 	ReDim ProjectInfoTable(totalPrjNum)
 

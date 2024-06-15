@@ -15,7 +15,7 @@ Option Base 1
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 ' 출력에 필요한 환경 변수들
-Public SheetName			As String ' 출력할 시트 이름
+'Public SheetName			As String ' 출력할 시트 이름
 Public InfoWidth 			As Integer ' 출력할 시트의 가로 크기
 Public InfoHeight 			As Integer ' 출력할 시트의 세로 크기
 Private ProjectInfo(1 To H_INFO, 1 To W_INFO) As Variant ' 출력할 헤더를 기록하는 배열
@@ -55,7 +55,7 @@ Public FinalPaymentMonth 	As Integer ' 3차 지급 월
 ' initNum  : 프로젝트의 관리 번호, 프로젝트마다 유니크함
 ' shtName: 출력할 시트의 이름
 ' ODate    : 프로젝트가 발생한 달
-Public Sub Init(initType As Integer, initNum As Integer, shtName As String, ODate As Integer)
+Public Sub Init(initType As Integer, initNum As Integer, ODate As Integer)
 
     ' 상수 값 설정
     InfoWidth 	= W_INFO
@@ -64,8 +64,7 @@ Public Sub Init(initType As Integer, initNum As Integer, shtName As String, ODat
     ' 전달받은 값들로 초기화
     ProjectType = initType
     ProjectNum 	= initNum
-    SheetName 	= shtName
-
+    
     ' 1번 프로젝트 생성 시 프로젝트 시트의 헤더를 만든다.
     If initNum = 1 Then
         Call PrintHeader
@@ -88,16 +87,11 @@ End Sub
 
 ' 프로젝트와 패턴을 배열에 담아 온다.
 Public Function SetProjectEnv()
-	Dim dataSheetName As String
-	dataSheetName = "activity_struct"
-
-	Dim dataSheet As Worksheet
-	Set dataSheet = ThisWorkbook.Sheets(dataSheetName)
-
+	
 	ReDim PrjAttribute(1 to 5, 1 to 14 )
 	ReDim PatAttribute(1 to 6, 1 to 27)
 
-	With dataSheet
+	With gWsActivity_Struct
 		PrjAttribute	= .Range(.Cells(3,1),.Cells(7,14)).Value
 		PatAttribute	= .Range(.Cells(15,1),.Cells(20,27)).Value
 	END With
@@ -502,10 +496,8 @@ End Function
 Public Function PrintHeader()
 
     Dim MyArray() 	As String, strHeader As String
-    Dim sheetPrj 	As Worksheet
-
-    Set sheetPrj 	= ThisWorkbook.Sheets(SheetName)
-    With sheetPrj
+    
+    With gWsProject
         strHeader	= "타입 순번 발주일 시작가능 기간 시작 수익 경험 성공% CF1% CF2% CF3%"
         MyArray 	= Split(strHeader)
         .Range(.Cells(1, 1), .Cells(1, InfoWidth)).Value = MyArray
@@ -560,13 +552,9 @@ Public Function PrintInfo()
         posX = posX + 1: ProjectInfo(posY, posX) = Activities(i).LowSkill
     Next i
 
-    Dim sheetPrj As Worksheet
-
-    Set sheetPrj = Worksheets(SheetName)
-
     posY = (ProjectNum - 1) * InfoHeight + 3
 
-    With sheetPrj
+    With gWsProject
         Dim RNG1 As Range
         Set RNG1 = .Range(.Cells(posY, 1), .Cells(posY + InfoHeight - 1, InfoWidth))
         RNG1.Value = ProjectInfo

@@ -26,14 +26,9 @@ End Sub
 
 Function PrintProject()
 
-	Dim ws 			As Worksheet
-	
 	On Error GoTo ErrorHandler
 
-	Set ws 			= ThisWorkbook.Sheets(PROJECT_SHEET_NAME)
-
-	Call ClearSheet(ws)			'시트의 모든 내용을 지우고 셀 병합 해제
-
+	Call ClearSheet(gWsProject)			'시트의 모든 내용을 지우고 셀 병합 해제
 
 	Dim arrHeader As Variant
     Dim strHeader As String
@@ -43,14 +38,14 @@ Function PrintProject()
     arrHeader = Split(strHeader, ",")
     arrHeader = ConvertToBase1(arrHeader)
 	arrHeader = ConvertTo1xN(arrHeader)
-	Call PrintArrayWithLine(ws, 2, 1,arrHeader)
+	Call PrintArrayWithLine(gWsProject, 2, 1,arrHeader)
     
     ' 두 번째 줄 헤더    
     strHeader = ",Dur,start,end,HR_H,HR_M,HR_L,,,mon_cf1,mon_cf2,mon_cf3"
 	arrHeader = Split(strHeader, ",")
     arrHeader = ConvertToBase1(arrHeader)
 	arrHeader = ConvertTo1xN(arrHeader)
-	Call PrintArrayWithLine(ws, 3, 1,arrHeader)
+	Call PrintArrayWithLine(gWsProject, 3, 1,arrHeader)
 
 	Dim temp As clsProject
 	Dim i As Integer
@@ -99,21 +94,17 @@ End Function
 
 Function PrintDashboard()	' 생성된 대시보드를 시트에 출력한다
 
-	Dim ws 			As Worksheet
-	
 	On Error GoTo ErrorHandler
 
-	Set ws 			= ThisWorkbook.Sheets(DBOARD_SHEET_NAME)
 
-	Call ClearSheet(ws)			'시트의 모든 내용을 지우고 셀 병합 해제
+	Call ClearSheet(gWsDashboard)			'시트의 모든 내용을 지우고 셀 병합 해제
 
 	Dim arrHeader As Variant
     arrHeader = Array("월", "누계", "발주")
-	Call PrintArrayWithLine(ws, 2, 1,arrHeader)		' 세로항목을 적고
 
-	Call PrintArrayWithLine(ws, 2, 2,PrintDurationTable)	'기간을 적고
-	
-	Call PrintArrayWithLine(ws, 3, 2,GetOrderTable)		' 내용을 적는다.
+	Call PrintArrayWithLine(gWsDashboard, 2, 1,arrHeader)		' 세로항목을 적고
+	Call PrintArrayWithLine(gWsDashboard, 2, 2,PrintDurationTable)	'기간을 적고	
+	Call PrintArrayWithLine(gWsDashboard, 3, 2,GetOrderTable)		' 내용을 적는다.
 
 	' Set myArray = GetPrintHeaderTable
 	' PrintArrayWithLine(ws, 1, 1,myArray)	
@@ -218,7 +209,7 @@ ErrHandler:
     On Error GoTo 0
 End Function
 
-
+''''' 여기 이하는 구 함수들이라 사용 안함??
 Function CreateProjects()
 
 	Dim i 				As Integer
@@ -254,7 +245,7 @@ Function CreateProjects()
 		For id = startPrjNum to endPrjNum ' 
 			Set tempPrj = New clsProject		
 			'Init(initType As Integer, initNum As Integer, shtName As String, ODate As Integer)	
-			Call tempPrj.Init(P_TYPE_EXTERNAL, id, PROJECT_SHEET_NAME,i) 
+			Call tempPrj.Init(P_TYPE_EXTERNAL, id, i) 
 			Set ProjectInfoTable(id) = tempPrj
 			Call tempPrj.PrintInfo()
 		Next
