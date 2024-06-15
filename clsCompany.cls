@@ -175,33 +175,33 @@ Public Function Init()
 	ReDim DefferTable(m_MaxIDsPerWeek+1, 	m_SimulationDuration)
 	ReDim ProjectInfoTable(totalPrjNum)
 
-	' 프로젝트들을 생성한다. 
-	For i = 1 to m_SimulationDuration 
+	' ' 프로젝트들을 생성한다. 
+	' For i = 1 to m_SimulationDuration 
 		
-		preTotal 	= OrderTable(1,i)			' 이전 기간 까지 발생한 프로젝트 누적 갯수
-		startPrjNum	= preTotal + 1 				' 이번 기간 시작프로젝트 번호
-		endPrjNum 	= OrderTable(2,i) + preTotal' 이번 기간 마지막 프로젝트 번호
+	' 	preTotal 	= OrderTable(1,i)			' 이전 기간 까지 발생한 프로젝트 누적 갯수
+	' 	startPrjNum	= preTotal + 1 				' 이번 기간 시작프로젝트 번호
+	' 	endPrjNum 	= OrderTable(2,i) + preTotal' 이번 기간 마지막 프로젝트 번호
 		
-		If startPrjNum = 0 Then
-			GoTo Continue 
-		End If
+	' 	If startPrjNum = 0 Then
+	' 		GoTo Continue 
+	' 	End If
 
-		If startPrjNum > endPrjNum Then
-			GoTo Continue 
-		End If	
+	' 	If startPrjNum > endPrjNum Then
+	' 		GoTo Continue 
+	' 	End If	
 
-		' 이번 주에 발생한 프로젝트들을 생성한다.
-		For id = startPrjNum to endPrjNum ' 
-			Set tempPrj = New clsProject		
-			'Init(initType As Integer, initNum As Integer, shtName As String, ODate As Integer)	
-			Call tempPrj.Init(P_TYPE_EXTERNAL, id, PROJECT_SHEET_NAME,i) 
-			Set ProjectInfoTable(id) = tempPrj
-			Call tempPrj.PrintInfo()
-		Next
+	' 	' 이번 주에 발생한 프로젝트들을 생성한다.
+	' 	For id = startPrjNum to endPrjNum ' 
+	' 		Set tempPrj = New clsProject		
+	' 		'Init(initType As Integer, initNum As Integer, shtName As String, ODate As Integer)	
+	' 		Call tempPrj.Init(P_TYPE_EXTERNAL, id, PROJECT_SHEET_NAME,i) 
+	' 		Set ProjectInfoTable(id) = tempPrj
+	' 		Call tempPrj.PrintInfo()
+	' 	Next
 
-		Continue: 
+	' 	Continue: 
 
-	Next
+	' Next
   
 End Function
 
