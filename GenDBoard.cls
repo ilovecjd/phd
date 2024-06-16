@@ -95,7 +95,7 @@ Function PrintDashboard()	' 생성된 대시보드를 시트에 출력한다
     arrHeader = Array("월", "누계", "발주")
 
 	Call PrintArrayWithLine(gWsDashboard, 2, 1,arrHeader)		' 세로항목을 적고
-	Call PrintArrayWithLine(gWsDashboard, 2, 2,PrintDurationTable)	'기간을 적고	
+	Call PrintArrayWithLine(gWsDashboard, 2, 2,gPrintDurationTable)	'기간을 적고	
 	Call PrintArrayWithLine(gWsDashboard, 3, 2,gOrderTable)		' 내용을 적는다.
 
 	' Set myArray = GetPrintHeaderTable
@@ -130,74 +130,6 @@ Function ClearSheet(ws As Worksheet)
 End Function
 
 
-Sub PrintArrayWithLine(ws As Worksheet, startRow As Long, startCol As Long, dataArray As Variant)
-
-    Dim startRange As Range
-    Dim endRange As Range
-    Dim numRows As Long
-    Dim numCols As Long
-    Dim i As Long
-    
-    Set startRange = ws.Cells(startRow, startCol) ' 시작 셀 설정
-    
-    ' 배열의 차원 확인
-    Dim dimensions As Integer
-    dimensions = GetArrayDimensions(dataArray)
-    
-    If dimensions = 1 Then
-        ' 1차원 배열 처리
-        numRows = UBound(dataArray) - LBound(dataArray) + 1
-        numCols = 1 ' 1차원 배열이므로 열의 수는 1
-        
-        Set endRange = startRange.Resize(numRows, numCols) ' 출력할 범위 설정
-        
-        ' 1차원 배열을 2차원 범위에 출력
-        For i = 1 To numRows
-            endRange.Cells(i, 1).Value = dataArray(i)
-        Next i
-        
-    ElseIf dimensions = 2 Then
-        ' 2차원 배열 처리
-        numRows = UBound(dataArray, 1) - LBound(dataArray, 1) + 1
-        numCols = UBound(dataArray, 2) - LBound(dataArray, 2) + 1
-        
-        Set endRange = startRange.Resize(numRows, numCols) ' 출력할 범위 설정
-        endRange.Value = dataArray ' 배열을 시트에 출력
-    End If
-    
-    ' 테두리 그리기
-    With endRange.Borders
-        .LineStyle = xlContinuous
-        .Weight = xlThin
-        .ColorIndex = xlAutomatic
-    End With
-
-End Sub
 
 
-
-' 배열의 차원을 구하는 함수
-Function GetArrayDimensions(arr As Variant) As Integer
-
-    Dim dimCount As Integer
-    Dim currentDim As Integer
-    
-    On Error GoTo ErrHandler
-    dimCount = 0
-    currentDim = 0
-    
-    Do While True
-        currentDim = currentDim + 1
-        ' 배열의 각 차원을 확인
-        Dim temp As Long
-        temp = LBound(arr, currentDim)
-        dimCount = currentDim
-    Loop
-    
-ErrHandler:
-    If Err.Number <> 0 Then
-        GetArrayDimensions = dimCount
-    End If
-    On Error GoTo 0
-End Function
 

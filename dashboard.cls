@@ -19,13 +19,10 @@ Private Sub CommandButton1_Click()
 	Company.comID = 1	' song ==> 회사 ID를 넣어 주자. (같은 조건에서 여러 회사를 운영)
 	Call Company.Init()	' 초기화 한다. 현재는 비어 있다.  song ==> 추후 로드로 변경해야 할 수도 있다.
 
-	' For i = 1 to 10 'song ==> SimulTerm 으로 수정
-	' 	Call Company.Decision(i)	' i번째 기간에 결정해야 할 일들
-	' 	Dim Arr() As Variant
-	' 	Arr = Company.PropertyDoingTable
-	' 	Call PrintPDecision(Arr)
-		
-	' Next
+	For i = 1 to gExcelEnv.SimulationDuration 'song ==> 일단 10주만 돌려보자.
+		Call Company.Decision(i)	' i번째 기간에 결정해야 할 일들
+		'Call PrintPDecision(Arr)		
+	Next
 
 	Call Epilogue()
 	
