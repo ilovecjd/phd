@@ -49,13 +49,16 @@ Public Const RND_HR_H = 20	' 고급 인력이 필요할 확율
 Public Const RND_HR_M = 70	' 중급 인력이 필요할 확율
 
 ' 1: 2~4 / 2:5~12 3:13~26 4:27~52 5:53~80
-Public Const MAX_PRJ_TYPE 	= 5		' 프로젝트 기간별로 타입을 구분한다.
-Public Const RND_PRJ_TYPE1 	= 20	' 1번 타입일 확율 1:  2~4 주
-Public Const RND_PRJ_TYPE2 	= 70	' 2번 타입일 확율 2:  5~12주
-Public Const RND_PRJ_TYPE3 	= 20	' 3번 타입일 확율 3: 13~26주
-Public Const RND_PRJ_TYPE4 	= 70	' 4번 타입일 확율 4: 27~52주
-Public Const RND_PRJ_TYPE5 	= 20	' 5번 타입일 확율 5: 53~80주
+Public Const MAX_PRJ_TYPE 	As Integer	= 5		' 프로젝트 기간별로 타입을 구분한다.
+Public Const RND_PRJ_TYPE1 	As Integer	= 20	' 1번 타입일 확율 1:  2~4 주
+Public Const RND_PRJ_TYPE2 	As Integer	= 70	' 2번 타입일 확율 2:  5~12주
+Public Const RND_PRJ_TYPE3 	As Integer	= 20	' 3번 타입일 확율 3: 13~26주
+Public Const RND_PRJ_TYPE4 	As Integer	= 70	' 4번 타입일 확율 4: 27~52주
+Public Const RND_PRJ_TYPE5 	As Integer	= 20	' 5번 타입일 확율 5: 53~80주
 
+''''''''''''''''''''
+'' 출력을 위한 상수들
+Public Const DONG_TABLE_INDEX 	As Long	= 6		' 
 
 ' #define end
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''

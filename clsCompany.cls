@@ -11,9 +11,11 @@ Attribute VB_Exposed = False
 Option Explicit
 Option Base 1
 
-Private comDoingTable()			As Integer		' 진행중인 프로젝트들의 ID를 관리하는 테이블
-Private comDoneTable()			As Integer		' 완료된 프로젝트들의 ID를 관리하는 테이블
-Private comDefferTable()		As Integer		' 보류된 프로젝트들의 ID를 관리하는 테이블
+Private comDoingTable()     As Integer  ' 진행중인 프로젝트들의 ID를 관리하는 테이블
+Private comDoneTable()      As Integer  ' 완료된 프로젝트들의 ID를 관리하는 테이블
+Private comDefferTable()    As Integer  ' 보류된 프로젝트들의 ID를 관리하는 테이블
+
+
 
 Public comDoingTableSize As Integer		' comDoneTable의 현재크기 song ==> 동적으로 수정하자.
 Public comDoneTableSize As Integer		' comDoneTable의 현재크기 song ==> 동적으로 수정하자.
@@ -26,6 +28,32 @@ Public comID As Integer ' 회사 이름
 ' Public Property Get PropertyDoingTable()  As Variant
 '     PropertyDoingTable = comDoingTable
 ' End Property
+
+Public Property Get PropertyDoingTable() As Integer()
+    PropertyDoingTable = comDoingTable
+End Property
+
+Public Property Let PropertyDoingTable(Value() As Integer)
+    comDoingTable = Value
+End Property
+
+Public Property Get PropertyDoneTable() As Integer()
+    PropertyDoneTable = comDoneTable
+End Property
+
+Public Property Let PropertyDoneTable(Value() As Integer)
+    comDoneTable = Value
+End Property
+
+Public Property Get PropertyDefferTable() As Integer()
+    PropertyDefferTable = comDefferTable
+End Property
+
+Public Property Let PropertyDefferTable(Value() As Integer)
+    comDefferTable = Value
+End Property
+
+
 
 ' 생성자와 소멸자
 Private Sub Class_Initialize()
@@ -61,7 +89,7 @@ Public Function Decision(week As Integer)
 	'  이번주에 발주된 프로젝트중 시작할 것이 있으면 이번주 진행 프로젝트로 기록
 	Call SelectNewProject(week)
 
-	Call comPrintDashboard()
+	' Call comPrintDashboard()
 	' 	
 	
 End Function

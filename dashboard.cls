@@ -19,29 +19,66 @@ Private Sub CommandButton1_Click()
 	Company.comID = 1	' song ==> 회사 ID를 넣어 주자. (같은 조건에서 여러 회사를 운영)
 	Call Company.Init()	' 초기화 한다. 현재는 비어 있다.  song ==> 추후 로드로 변경해야 할 수도 있다.
 
+	Debug.Print VBA.String(200, vbNewLine)
+	
 	For i = 1 to gExcelEnv.SimulationDuration 'song ==> 일단 10주만 돌려보자.
 		Call Company.Decision(i)	' i번째 기간에 결정해야 할 일들
-		'Call PrintPDecision(Arr)		
+		Call dasClearTableArea(DONG_TABLE_INDEX)
+		Call daPrintDashboard(Company)
+		'Call dasPrintDecision(Arr)		
 	Next
 
 	Call Epilogue()
 	
 End Sub
 
-Function PrintPDecision(Arr() As Variant)
-
+Function dasClearTableArea(startRow As Long)
+	
 	With gWsDashboard
 		Dim endRow As Long ' 마지막행
-		Dim endCol As Long ' 마지막열
+        Dim endCol As Long ' 마지막열
+        endRow = .UsedRange.Rows.Count + .UsedRange.Row - 1
+        endCol = .UsedRange.Columns.Count + .UsedRange.Column - 1
 
-		'''''''''''''''''''''''''''''''''''''
-		' 배열의 크기를 구해서 배열을 넣고 테두리를 그린다.
-		endRow = UBound(Arr, 1) - LBound(Arr, 1) + 13
-		endCol = UBound(Arr, 2) - LBound(Arr, 2) + 2
-		.Range(.Cells(13, 2), .Cells(endRow, endCol)).value = Arr
-
+        ' 엑셀 파일의 셀들을 정리한다.
+        .Range(.Cells(startRow, 1), .Cells(endRow, endCol)).UnMerge
+        .Range(.Cells(startRow, 1), .Cells(endRow, endCol)).Clear
+        .Range(.Cells(startRow, 1), .Cells(endRow,endCol)).ClearContents
 	End With
 
+End Function
+
+Private Function daPrintDashboard(Company As clsCompany)
+	
+	On Error GoTo ErrorHandler
+
+	'Call ClearSheet(gWsDashboard)			'시트의 모든 내용을 지우고 셀 병합 해제
+
+	Dim startRow 	As Long
+	Dim arrHeader 	As Variant
+    arrHeader = Array("월", "누계", "prjNum")
+
+	startRow = DONG_TABLE_INDEX
+	Call PrintArrayWithLine(gWsDashboard, startRow + 1, 1,arrHeader)		' 세로항목을 적고
+	Call PrintArrayWithLine(gWsDashboard, startRow + 1, 2,gPrintDurationTable)	'기간을 적고	
+	Call PrintArrayWithLine(gWsDashboard, startRow + 2, 2,Company.PropertyDoingTable)		' 내용을 적는다.
+
+	startRow = startRow + Company.comDoingTableSize + 2
+	Call PrintArrayWithLine(gWsDashboard, startRow + 1, 1,arrHeader)		' 세로항목을 적고
+	Call PrintArrayWithLine(gWsDashboard, startRow + 1, 2,gPrintDurationTable)	'기간을 적고	
+	Call PrintArrayWithLine(gWsDashboard, startRow + 2, 2,Company.PropertyDoneTable)		' 내용을 적는다.
+
+	startRow = startRow + Company.comDoneTableSize + 2
+	Call PrintArrayWithLine(gWsDashboard, startRow + 1, 1,arrHeader)		' 세로항목을 적고
+	Call PrintArrayWithLine(gWsDashboard, startRow + 1, 2,gPrintDurationTable)	'기간을 적고	
+	Call PrintArrayWithLine(gWsDashboard, startRow + 2, 2,Company.PropertyDefferTable)		' 내용을 적는다.
+
+
+	Exit Function
+
+ErrorHandler:
+	Call HandleError("comPrintDashboard", Err.Description)
+	
 End Function
 
 Sub GenerateCombinations()
