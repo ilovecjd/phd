@@ -13,7 +13,9 @@ Private Sub CommandButton1_Click()
 	Dim i 				As Integer	
 	Dim Company 		As clsCompany
 
-	Call Prologue()
+	LetExcelInitialized = 0
+	LetTableInitialized = 1
+	Call Prologue(1) '  프로젝트와 활동들을 로드 해서 사용하자
 
 	Set Company = New clsCompany	
 	Company.comID = 1	' song ==> 회사 ID를 넣어 주자. (같은 조건에서 여러 회사를 운영)

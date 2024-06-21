@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"vbaFormatter.breakOnSeperator": true,
+		"vbaFormatter.level": 1
+	}
+}

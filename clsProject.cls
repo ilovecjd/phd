@@ -23,25 +23,18 @@ Private ProjectInfo(1 To H_INFO, 1 To W_INFO) As Variant ' 출력할 헤더를 �
 ' 프로젝트 속성
 Public ProjectType			As Integer ' 프로젝트 타입 (0: 외부 / 1: 내부)
 Public ProjectNum 			As Integer ' 프로젝트의 번호
-Public ProjectDuration		As Integer ' 프로젝트의 총 기간
 
 Public OrderDate 			As Integer ' 발주일
 Public PossibleStartDate 	As Integer ' 시작 가능일
+Public ProjectDuration		As Integer ' 프로젝트의 총 기간
 Public StartDate 			As Integer ' 시작일 (0: 미시작)
-
 Public Profit 				As Double ' 총 기대 수익 (HR 종속)
 Public Experience 			As Integer ' 경험 (0: 무경험 1: 유경험)
 Public SuccessProbability 	As Integer ' 성공 확률
 
-' 활동
-Public NumActivities 		As Integer ' 총 활동 수
-Private Activities(1 To MAX_ACT) As Activity ' 활동에 관한 정보를 기록하는 배열
-Private PrjAttribute()			As Variant ' activity_struct 시트에서 프로젝트 속성을 읽어올 배력
-Private PatAttribute()			As Variant ' activity_struct 시트에서 패턴 속성을 읽어올 배열
-
 ' 현금 흐름
 Public NumCashFlows 		As Integer ' 비용 지급 횟수
-Private CashFlows(1 To MAX_N_CF) As Integer ' 용역비를 받는 비율을 기록하는 배열
+Private CashFlows(1 To MAX_N_CF) 			As Integer ' 용역비를 받는 비율을 기록하는 배열
 Public FirstPayment 		As Long ' 선금 액수
 Public MiddlePayment 		As Long ' 2차 지급 액수
 Public FinalPayment 		As Long ' 3차 지급 액수
@@ -49,6 +42,38 @@ Public FirstPaymentMonth 	As Integer ' 선금 지급 월
 Public MiddlePaymentMonth	As Integer ' 2차 지급 월
 Public FinalPaymentMonth 	As Integer ' 3차 지급 월
 
+
+' 활동
+Private NumActivities 		As Integer ' 총 활동 수
+Private Activities(1 To MAX_ACT) 		As Activity ' 활동에 관한 정보를 기록하는 배열
+Private PrjAttribute()		As Variant ' activity_struct 시트에서 프로젝트 속성을 읽어올 배열
+Private PatAttribute()		As Variant ' activity_struct 시트에서 패턴 속성을 읽어올 배열
+
+
+
+
+Public Property Get prjCashFlows() As Integer()
+    prjCashFlows = CashFlows
+End Property
+
+Public Property Let prjCashFlows(Value() As Integer)
+    CashFlows = Value
+End Property
+
+
+Public Property Get prjActivities() As Integer()
+    prjActivities = Activities
+End Property
+
+Public Property Let prjActivities(Value() As Integer)
+    Activities = Value
+End Property
+
+
+
+Sub Class_Initialize()
+	
+End Sub
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' Desc     : Project 클래스의 초기화
 ' initType : 프로젝트 타입 (0: 외부 / 1: 내부)
@@ -65,9 +90,10 @@ Public Sub Init(initType As Integer, initNum As Integer, ODate As Integer)
     ProjectType = initType
     ProjectNum 	= initNum
     
+
     ' 1번 프로젝트 생성 시 프로젝트 시트의 헤더를 만든다.
     If initNum = 1 Then
-        Call PrintHeader
+        Call PrintProjectHeader()
     End If
 
     ' 프로젝트 생성을 위해 필요한 값들을 생성한다.
@@ -84,6 +110,8 @@ Public Sub Init(initType As Integer, initNum As Integer, ODate As Integer)
     Call CalculatePaymentSchedule	' 대금 지급 조건 생성
 
 End Sub
+
+
 
 ' 프로젝트와 패턴을 배열에 담아 온다.
 Public Function SetProjectEnv()
@@ -404,7 +432,7 @@ Public Function CalculatePaymentSchedule()
                 FirstPayment = Profit * 0.5: CashFlows(1) = 50: CashFlows(2) = 50
         End Select
 
-        FinalPayment = Profit - FirstPayment
+        MiddlePayment = Profit - FirstPayment
         totalPayments = 2
         MiddlePaymentMonth = ProjectDuration
 
@@ -422,7 +450,7 @@ Public Function CalculatePaymentSchedule()
                 Case 3
                     FirstPayment = Profit * 0.5: CashFlows(1) = 50: CashFlows(2) = 50
             End Select
-            FinalPayment = Profit - FirstPayment
+            MiddlePayment = Profit - FirstPayment
             totalPayments = 2
             MiddlePaymentMonth = ProjectDuration
 
@@ -493,17 +521,17 @@ End Function
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' Desc : 프로젝트들을 출력할 엑셀 시트에 헤더를 생성한다.
-Public Function PrintHeader()
+Public Function prjPrintHeader()
 
     Dim MyArray() 	As String, strHeader As String
     
     With gWsProject
-        strHeader	= "타입 순번 발주일 시작가능 기간 시작 수익 경험 성공% CF1% CF2% CF3%"
-        MyArray 	= Split(strHeader)
+        strHeader	= "타입,순번,발주일,시작가능,기간,시작,수익,경험,성공%,nCF,CF1%,CF2%,CF3%,선금,중도,잔금"
+        MyArray 	= Split(strHeader,",")
         .Range(.Cells(1, 1), .Cells(1, InfoWidth)).Value = MyArray
 
-        strHeader 	= " Dur start end HR_H HR_M HR_L   mon_cf1 mon_cf2 mon_cf3"
-        MyArray 	= Split(strHeader)
+        strHeader 	= ",Dur,start,end,HR_H,HR_M,HR_L,,,mon_cf1,mon_cf2,mon_cf3"
+        MyArray 	= Split(strHeader,",")
         .Range(.Cells(2, 1), .Cells(2, InfoWidth)).Value = MyArray
     End With
 
@@ -526,16 +554,20 @@ Public Function PrintInfo()
     posX = posX + 1: ProjectInfo(posY, posX) = Profit ' 수익
     posX = posX + 1: ProjectInfo(posY, posX) = Experience ' 경험 유무
     posX = posX + 1: ProjectInfo(posY, posX) = SuccessProbability ' 성공 확률
-
-    For i = 1 To NumCashFlows
+	posX = posX + 1: ProjectInfo(posY, posX) = NumCashFlows ' 비용 지급 횟수
+    For i = 1 To MAX_N_CF
         posX = posX + 1: ProjectInfo(posY, posX) = CashFlows(i)
     Next i
+	posX = posX + 1: ProjectInfo(posY, posX) = FirstPayment		' 선금 액수
+	posX = posX + 1: ProjectInfo(posY, posX) = MiddlePayment	' 2차 지급 액수
+	posX = posX + 1: ProjectInfo(posY, posX) = FinalPayment		' 3차 지급 액수
 
     posX = 1: posY = 2: ProjectInfo(posY, posX) = "ActivityCnt"
     posX = posX + 1: ProjectInfo(posY, posX) = NumActivities
-    posX = posX + 8: ProjectInfo(posY, posX) = FirstPaymentMonth
+    posX = posX + 9: ProjectInfo(posY, posX) = FirstPaymentMonth
     posX = posX + 1: ProjectInfo(posY, posX) = MiddlePaymentMonth
     posX = posX + 1: ProjectInfo(posY, posX) = FinalPaymentMonth
+
 
     ' 활동 및 인력 정보 출력
     For i = 1 To MAX_ACT
@@ -552,7 +584,7 @@ Public Function PrintInfo()
         posX = posX + 1: ProjectInfo(posY, posX) = Activities(i).LowSkill
     Next i
 
-    posY = (ProjectNum - 1) * InfoHeight + 3
+    posY = (ProjectNum - 1) * InfoHeight + 4
 
     With gWsProject
         Dim RNG1 As Range
