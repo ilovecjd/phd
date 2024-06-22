@@ -18,7 +18,7 @@ Option Base 1
 'Public SheetName			As String ' 출력할 시트 이름
 Public InfoWidth 			As Integer ' 출력할 시트의 가로 크기
 Public InfoHeight 			As Integer ' 출력할 시트의 세로 크기
-Private ProjectInfo(1 To H_INFO, 1 To W_INFO) As Variant ' 출력할 헤더를 기록하는 배열
+Private ProjectInfo() 		As Variant ' 출력할 헤더를 기록하는 배열
 
 ' 프로젝트 속성
 Public ProjectType			As Integer ' 프로젝트 타입 (0: 외부 / 1: 내부)
@@ -34,7 +34,7 @@ Public SuccessProbability 	As Integer ' 성공 확률
 
 ' 현금 흐름
 Public NumCashFlows 		As Integer ' 비용 지급 횟수
-Private CashFlows(1 To MAX_N_CF) 			As Integer ' 용역비를 받는 비율을 기록하는 배열
+Private CashFlows() 		As Integer ' 용역비를 받는 비율을 기록하는 배열
 Public FirstPayment 		As Long ' 선금 액수
 Public MiddlePayment 		As Long ' 2차 지급 액수
 Public FinalPayment 		As Long ' 3차 지급 액수
@@ -44,35 +44,39 @@ Public FinalPaymentMonth 	As Integer ' 3차 지급 월
 
 
 ' 활동
-Private NumActivities 		As Integer ' 총 활동 수
-Private Activities(1 To MAX_ACT) 		As Activity ' 활동에 관한 정보를 기록하는 배열
+Public NumActivities 		As Integer ' 총 활동 수
+Private Activities() 		As Activity ' 활동에 관한 정보를 기록하는 배열
 Private PrjAttribute()		As Variant ' activity_struct 시트에서 프로젝트 속성을 읽어올 배열
 Private PatAttribute()		As Variant ' activity_struct 시트에서 패턴 속성을 읽어올 배열
 
 
-
-
-Public Property Get prjCashFlows() As Integer()
-    prjCashFlows = CashFlows
+Public Property Get PrjCashFlows() As Integer()
+    PrjCashFlows = CashFlows
 End Property
 
-Public Property Let prjCashFlows(Value() As Integer)
+Public Property Get PrjActivities() As Integer()
+    PrjActivities = Activities
+End Property
+
+
+
+
+Public Function SetPrjActivities(i As Integer, Value As Activity)    
+    Activities(i) = Value
+End Function
+
+Public Function SetPrjCashFlows(Value() As Integer)
     CashFlows = Value
-End Property
+End Function
 
+Private Sub Class_Initialize()
+	InfoWidth 	= W_INFO
+    InfoHeight 	= H_INFO
 
-Public Property Get prjActivities() As Integer()
-    prjActivities = Activities
-End Property
+	ReDim ProjectInfo(1 To InfoHeight, 1 To InfoWidth)
+	ReDim CashFlows(1 To MAX_N_CF)
+	ReDim Activities(1 To MAX_ACT)
 
-Public Property Let prjActivities(Value() As Integer)
-    Activities = Value
-End Property
-
-
-
-Sub Class_Initialize()
-	
 End Sub
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' Desc     : Project 클래스의 초기화
@@ -81,10 +85,6 @@ End Sub
 ' shtName: 출력할 시트의 이름
 ' ODate    : 프로젝트가 발생한 달
 Public Sub Init(initType As Integer, initNum As Integer, ODate As Integer)
-
-    ' 상수 값 설정
-    InfoWidth 	= W_INFO
-    InfoHeight 	= H_INFO
 
     ' 전달받은 값들로 초기화
     ProjectType = initType

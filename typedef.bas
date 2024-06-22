@@ -5,18 +5,43 @@ Option Base 1
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' Define Global Variable
-
+' Const Start
 ' sheet name
-Public Const PARAMETER_SHEET_NAME	= "GenDBoard"
-Public Const DBOARD_SHEET_NAME 		= "dashboard"
-Public Const PROJECT_SHEET_NAME 	= "project"
-Public Const ACTIVITY_SHEET_NAME 	= "activity_struct"
+Public  Const PARAMETER_SHEET_NAME	= "GenDBoard"
+Public  Const DBOARD_SHEET_NAME 	= "dashboard"
+Public  Const PROJECT_SHEET_NAME 	= "project"
+Public  Const ACTIVITY_SHEET_NAME 	= "activity_struct"
 
 ' 주요 테이블의 제목
-Public Const ORDER_PROJECT_TITLE	= "발주 프로젝트 현황"
+Public  Const ORDER_PROJECT_TITLE	= "발주 프로젝트 현황"
 
-Public Const P_TYPE_EXTERNAL = 0 ' 외부(발주)프로젝트
-Public Const P_TYPE_INTERNAL = 1 ' 내부 프로젝트
+Public  Const P_TYPE_EXTERNAL = 0 ' 외부(발주)프로젝트
+Public  Const P_TYPE_INTERNAL = 1 ' 내부 프로젝트
+
+''''''''''''''''''''
+' 프로젝트 생성과 관련된 상수들
+Public  Const MAX_ACT    	As Integer	= 4	 ' 최대 활동의 수
+Public  Const MAX_N_CF   	As Integer  = 3	 ' 최대 CF의 갯수 (개발비를 최대로 나누어 받는 횟수)
+Public  Const W_INFO			As Integer 	= 16 ' 출력할 가로의 크기
+Public  Const H_INFO 		As Integer 	= 8  ' 출력할 세로의 크기
+
+Public  Const RND_HR_H = 20	' 고급 인력이 필요할 확율
+Public  Const RND_HR_M = 70	' 중급 인력이 필요할 확율
+
+' 1: 2~4 / 2:5~12 3:13~26 4:27~52 5:53~80
+Public  Const MAX_PRJ_TYPE 	As Integer	= 5		' 프로젝트 기간별로 타입을 구분한다.
+Public  Const RND_PRJ_TYPE1 	As Integer	= 20	' 1번 타입일 확율 1:  2~4 주
+Public  Const RND_PRJ_TYPE2 	As Integer	= 70	' 2번 타입일 확율 2:  5~12주
+Public  Const RND_PRJ_TYPE3 	As Integer	= 20	' 3번 타입일 확율 3: 13~26주
+Public  Const RND_PRJ_TYPE4 	As Integer	= 70	' 4번 타입일 확율 4: 27~52주
+Public  Const RND_PRJ_TYPE5 	As Integer	= 20	' 5번 타입일 확율 5: 53~80주
+
+''''''''''''''''''''
+'' 출력과 로드를 위한 상수들
+Public  Const ORDER_TABLE_INDEX 		As Long	= 1		' 
+Public  Const DONG_TABLE_INDEX 			= 6		' 
+Public  Const PROJECT_TABLE_INDEX 	As Long	= 3		' 
+' Const End
 
 Private gExcelInitialized 	As Boolean	' 전역 변수들이 초기화 되었는지 확인하는 플래그. 초기화 되면 1
 Private gTableInitialized 	As Boolean	' 전역 테이블이 초기화 되었는지 확인하는 플래그. 초기화 되면 1
@@ -37,29 +62,6 @@ Public gProjectTable()	As clsProject	' 모든 프로제트들을 담고 있는 �
 Public gPrintDurationTable()	As Variant 		' 사용하기 편하게 모든 월을 넣어 놓는다. 
 
 
-''''''''''''''''''''
-' 프로젝트 생성과 관련된 상수들
-Public Const MAX_ACT    	As Integer	= 4	 ' 최대 활동의 수
-Public Const MAX_N_CF   	As Integer  = 3	 ' 최대 CF의 갯수 (개발비를 최대로 나누어 받는 횟수)
-Public Const W_INFO			As Integer 	= 16 ' 출력할 가로의 크기
-Public Const H_INFO 		As Integer 	= 8  ' 출력할 세로의 크기
-
-Public Const RND_HR_H = 20	' 고급 인력이 필요할 확율
-Public Const RND_HR_M = 70	' 중급 인력이 필요할 확율
-
-' 1: 2~4 / 2:5~12 3:13~26 4:27~52 5:53~80
-Public Const MAX_PRJ_TYPE 	As Integer	= 5		' 프로젝트 기간별로 타입을 구분한다.
-Public Const RND_PRJ_TYPE1 	As Integer	= 20	' 1번 타입일 확율 1:  2~4 주
-Public Const RND_PRJ_TYPE2 	As Integer	= 70	' 2번 타입일 확율 2:  5~12주
-Public Const RND_PRJ_TYPE3 	As Integer	= 20	' 3번 타입일 확율 3: 13~26주
-Public Const RND_PRJ_TYPE4 	As Integer	= 70	' 4번 타입일 확율 4: 27~52주
-Public Const RND_PRJ_TYPE5 	As Integer	= 20	' 5번 타입일 확율 5: 53~80주
-
-''''''''''''''''''''
-'' 출력과 로드를 위한 상수들
-Public Const ORDER_TABLE_INDEX 		As Long	= 1		' 
-Public Const DONG_TABLE_INDEX 		As Long	= 6		' 
-Public Const PROJECT_TABLE_INDEX 	As Long	= 3		' 
 
 ' #define end
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -209,20 +211,30 @@ Private Function LoadProjects() As Boolean
 	Dim iTemp 		As Integer '
 	Dim tempPrj 	As clsProject
 
+
+				'프로젝트들을 생성한다. 
+	ReDim gProjectTable(gTotalProjectNum)
+
+
+
+
+
+
 	For prjID = 1 to  gTotalProjectNum
 
-		tempPrj = New clsProject
+		Set tempPrj = New clsProject
 		startRow = PROJECT_TABLE_INDEX + (prjID-1) * H_INFO + 1
 		endRow = startRow + H_INFO - 1
 
 		With gWsProject
-			prjInfo = .Range(.Cells(startRow,1),Cells(endRow,W_INFO)).Value
+			prjInfo = .Range(.Cells(startRow,1),.Cells(endRow,W_INFO)).Value
 		End With
 
 
 		Dim i As Integer
 		Dim j As Integer
 		Dim k As Integer
+		Dim tempCF(1 To MAX_N_CF) As Integer
 
 		i= 1 : j = 1
 		tempPrj.ProjectType 		= prjInfo(i,j) : j = j + 1
@@ -236,17 +248,21 @@ Private Function LoadProjects() As Boolean
 		tempPrj.SuccessProbability	= prjInfo(i,j) : j = j + 1
 		tempPrj.NumCashFlows		= MAX_N_CF
 		For k = 1 To MAX_N_CF
-			tempPrj.CashFlows(k)	= prjInfo(i,j) : j = j + 1			
+			tempCF(k)				= prjInfo(i,j) : j = j + 1			
 		Next		
+		'tempPrj.SetPrjCashFlows 	= tempCF
+		Call tempPrj.SetPrjCashFlows(tempCF)
+		
+
 		tempPrj.FirstPayment 		= prjInfo(i,j) : j = j + 1
 		tempPrj.MiddlePayment 		= prjInfo(i,j) : j = j + 1
 		tempPrj.FinalPayment 		= prjInfo(i,j) : j = j + 1
 
 
-		i = 2 : j = 1		
+		i = 2 : j = 2		
 		tempPrj.NumActivities		= prjInfo(i,j)
 		
-		j = 10 ' 여기는 늘 조심하자	
+		j = j + 9 ' 여기는 늘 조심하자	
 		tempPrj.FirstPaymentMonth 	= prjInfo(i,j) : j = j + 1
 		tempPrj.MiddlePaymentMonth	= prjInfo(i,j) : j = j + 1
 		tempPrj.FinalPaymentMonth 	= prjInfo(i,j) : j = j + 1
@@ -260,11 +276,13 @@ Private Function LoadProjects() As Boolean
 			tempAct.HighSkill		= prjInfo(i,j) : j = j + 1			
 			tempAct.MidSkill		= prjInfo(i,j) : j = j + 1			
 			tempAct.LowSkill		= prjInfo(i,j) : j = j + 1		
-			tempPrj.Activities(i-2)	= tempAct
+			'tempPrj.Activities(i-2)	= tempAct
+			Call tempPrj.SetPrjActivities(i-2,tempAct)
 		Next
-		
+
+		Set gProjectTable(prjID) = tempPrj
+
 	Next
-	
 	
 End Function
 
